@@ -1,6 +1,6 @@
 import os
 
-dataDir = r'D:\programowanie\python\przetwarzanieJezykaNaturalnego\projekt\data\aclImdb'
+dataDir = r'D:\programowanie\python\przetwarzanieJezykaNaturalnego\projekt\data'
 
 positiveReviews = []
 for filename in os.listdir(os.path.join(dataDir, 'train/pos')):
