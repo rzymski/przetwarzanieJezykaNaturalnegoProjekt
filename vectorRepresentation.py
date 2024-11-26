@@ -29,8 +29,8 @@ def createVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput
     trainTfidfDF = pd.DataFrame(trainTfidfMatrix.toarray(), columns=vectorizer.get_feature_names_out())
     testTfidfDF = pd.DataFrame(testTfidfMatrix.toarray(), columns=vectorizer.get_feature_names_out())
 
-    trainTfidfDF.to_csv(trainOutput, index=False)
-    testTfidfDF.to_csv(testOutput, index=False)
+    trainTfidfDF.to_csv(trainOutput, index=False, header=False)
+    testTfidfDF.to_csv(testOutput, index=False, header=False)
 
     print(f"Macierze TF-IDF zostały zapisane w plikach:\n{trainOutput}\n{testOutput}")
 
