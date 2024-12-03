@@ -5,33 +5,37 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 def loadFilesFromFolder(inputFolder, maxNumberOfFiles=1000):
     documents = []
-    print("📂 Rozpoczynanie wczytywania dokumentów z folderu:", inputFolder)
-    for root, dirs, files in os.walk(inputFolder):
-        for index, file in enumerate(files, 1):
+    for subfolder in ['neg', 'pos']:
+        folderPath = os.path.join(inputFolder, subfolder)
+        print(f"📂 Rozpoczynanie wczytywania dokumentów z folderu: {folderPath}")
+        for index, file in enumerate(os.listdir(folderPath), 1):
             if file.endswith('.txt'):
-                filePath = os.path.join(root, file)
+                filePath = os.path.join(folderPath, file)
                 with open(filePath, 'r', encoding='utf-8') as f:
                     content = f.read()
                     documents.append(content)
-                print(f"📄 Wczytano plik: {filePath}")
-            if index >= maxNumberOfFiles:
-                print(f"✔️ Wczytano {maxNumberOfFiles=} dokumenty.")
-                return documents
-    print("✔️ Wczytano wszystkie dokumenty.")
+                if index >= maxNumberOfFiles:
+                    print(f"✔️ Wczytano maksymalną liczbę plików ({maxNumberOfFiles}) z folderu: {folderPath}")
+                    break
+    print(f"✔️ Wczytano wszystkie dokumenty (łącznie: {len(documents)}).")
     return documents
 
 
-def saveInChunks(matrix, outputPath, chunk_size=3000):
-    print(f"💾 Zapisuję macierz do pliku {outputPath} w partiach po {chunk_size} wierszy...")
+def saveInChunks(matrix, outputPath, chunkSize=5000):
+    if os.path.exists(outputPath):
+        os.remove(outputPath)
+        print(f"🗑️ Usunięto istniejący plik: {outputPath}")
+    print(f"💾 Zapisuję macierz do pliku {outputPath} w partiach po {chunkSize} wierszy...")
     num_rows = matrix.shape[0]
-    for start in range(0, num_rows, chunk_size):
-        end = min(start + chunk_size, num_rows)
+    for start in range(0, num_rows, chunkSize):
+        end = min(start + chunkSize, num_rows)
         chunk = matrix[start:end].toarray()
         pd.DataFrame(chunk).to_csv(outputPath, mode='a', header=False, index=False)
         print(f"✅ Zapisano wiersze od {start} do {end}.")
 
 
-def createVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, chunk_size=5000):
+def createVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, chunkSize=1000):
+    print("🚀 Rozpoczynanie procesu tworzenia reprezentacji wektorowych...")
     # Wczytaj dokumenty z folderów treningowych i testowych
     print("🔄 Rozpoczynanie wczytywania dokumentów treningowych i testowych...")
     trainDocuments = loadFilesFromFolder(trainFolder)
@@ -45,8 +49,10 @@ def createVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput
     print("✅ Obliczono macierz TF-IDF.")
 
     # Zapisuj macierze TF-IDF partiami do plików CSV
-    saveInChunks(trainTfidfMatrix, trainOutput, chunk_size)
-    saveInChunks(testTfidfMatrix, testOutput, chunk_size)
+    saveInChunks(trainTfidfMatrix, trainOutput, chunkSize)
+    saveInChunks(testTfidfMatrix, testOutput, chunkSize)
+    print("✔️ Proces tworzenia reprezentacji wektorowych zakończony.")
+
 
 
 if __name__ == "__main__":
@@ -54,7 +60,4 @@ if __name__ == "__main__":
     testFolderPath = 'dataProcessed/test'
     trainMatrixFile = 'trainingMatrix.csv'
     testMatrixFile = 'testMatrix.csv'
-
-    print("🚀 Rozpoczynanie procesu tworzenia reprezentacji wektorowych...")
     createVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile)
-    print("✔️ Proces tworzenia reprezentacji wektorowych zakończony.")
