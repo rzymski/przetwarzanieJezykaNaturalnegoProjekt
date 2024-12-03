@@ -21,7 +21,17 @@ def loadFilesFromFolder(inputFolder, maxNumberOfFiles=1000):
     return documents
 
 
-def createVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput):
+def saveInChunks(matrix, outputPath, chunk_size=3000):
+    print(f"💾 Zapisuję macierz do pliku {outputPath} w partiach po {chunk_size} wierszy...")
+    num_rows = matrix.shape[0]
+    for start in range(0, num_rows, chunk_size):
+        end = min(start + chunk_size, num_rows)
+        chunk = matrix[start:end].toarray()
+        pd.DataFrame(chunk).to_csv(outputPath, mode='a', header=False, index=False)
+        print(f"✅ Zapisano wiersze od {start} do {end}.")
+
+
+def createVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, chunk_size=5000):
     # Wczytaj dokumenty z folderów treningowych i testowych
     print("🔄 Rozpoczynanie wczytywania dokumentów treningowych i testowych...")
     trainDocuments = loadFilesFromFolder(trainFolder)
@@ -29,19 +39,14 @@ def createVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput
 
     # Oblicz macierz TF-IDF
     print("🔧 Rozpoczynanie obliczania macierzy TF-IDF...")
-    vectorizer = TfidfVectorizer(token_pattern=r"(?u)\b\w\w+\b")
+    vectorizer = TfidfVectorizer(token_pattern=r"(?u)\b\w\w+\b")    
     trainTfidfMatrix = vectorizer.fit_transform(trainDocuments)
     testTfidfMatrix = vectorizer.transform(testDocuments)
     print("✅ Obliczono macierz TF-IDF.")
 
-    # Konwertuj macierze TF-IDF do DataFrame i zapisz do plików CSV
-    print("💾 Zapisuję macierze TF-IDF do plików CSV...")
-    trainTfidfDF = pd.DataFrame(trainTfidfMatrix.toarray(), columns=vectorizer.get_feature_names_out())
-    testTfidfDF = pd.DataFrame(testTfidfMatrix.toarray(), columns=vectorizer.get_feature_names_out())
-
-    trainTfidfDF.to_csv(trainOutput, index=False, header=False)
-    testTfidfDF.to_csv(testOutput, index=False, header=False)
-    print(f"✅ Macierze TF-IDF zostały zapisane w plikach:\n{trainOutput}\n{testOutput}")
+    # Zapisuj macierze TF-IDF partiami do plików CSV
+    saveInChunks(trainTfidfMatrix, trainOutput, chunk_size)
+    saveInChunks(testTfidfMatrix, testOutput, chunk_size)
 
 
 if __name__ == "__main__":
