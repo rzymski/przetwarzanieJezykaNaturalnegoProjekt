@@ -10,55 +10,47 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-def loadLabelsFromFolders(folder, maxNumberOfFiles=1000):
+# def loadLabelsFromFolders(folder, maxNumberOfFiles=None):
+#     labels = []
+#     for subFolder in ['neg', 'pos']:
+#         folderPath = os.path.join(folder, subFolder)
+#         for index, fileName in enumerate(os.listdir(folderPath), 1):
+#             if fileName.endswith('.txt'):
+#                 labels.append(0 if subFolder == 'neg' else 1)
+#             if maxNumberOfFiles and index >= maxNumberOfFiles:
+#                 print(f"✔️ Załadowano {maxNumberOfFiles=} labeli.")
+#                 break
+#     print(f"✔️ Wczytano wszystkie etykiety (łącznie: {len(labels)}).")
+#     return labels
+
+def loadLabelsFromFolders(folder, maxNumberOfFiles=None):
     labels = []
-    for subfolder in ['neg', 'pos']:
-        folderPath = os.path.join(folder, subfolder)
-        for index, fileName in enumerate(os.listdir(folderPath), 1):
-            if fileName.endswith('.txt'):
-                labels.append(0 if subfolder == 'neg' else 1)
-            if index >= maxNumberOfFiles:
-                print(f"✔️ Załadowano {maxNumberOfFiles=} labeli.")
-                break
+    for subFolder in ['neg', 'pos']:
+        folderPath = os.path.join(folder, subFolder)
+        numFiles = len([file for file in os.listdir(folderPath) if file.endswith('.txt')])
+        if maxNumberOfFiles:
+            numFiles = min(numFiles, maxNumberOfFiles)
+            print(f"✔️ Ograniczono liczbę plików w {subFolder} do {maxNumberOfFiles}.")
+        labels.extend([0 if subFolder == 'neg' else 1] * numFiles)
     print(f"✔️ Wczytano wszystkie etykiety (łącznie: {len(labels)}).")
     return labels
 
 
-def trainModelLinearSVC(folderWithFiles, matrixData):
-    trainLabels = loadLabelsFromFolders(folderWithFiles)
+def trainModel(folderWithFiles, matrixData, modelTrainFunction, maxNumberOfFiles=None, **modelParams):
+    # Load labels and data
+    trainLabels = loadLabelsFromFolders(folderWithFiles, maxNumberOfFiles)
     trainTfidfDF = pd.read_csv(matrixData, header=None)
-    classifier = LinearSVC()
+    # Initialize the model with the given parameters
+    classifier = modelTrainFunction(**modelParams)
+    # Train the model
     classifier.fit(trainTfidfDF, trainLabels)
+    print(f"✅ Model {modelTrainFunction.__name__} trained successfully with parameters: {modelParams}")
     return classifier
 
 
-def trainModelRandomForest(folderWithFiles, matrixData):
-    trainLabels = loadLabelsFromFolders(folderWithFiles)
-    trainTfidfDF = pd.read_csv(matrixData, header=None)
-    classifier = RandomForestClassifier(n_estimators=100, random_state=42)
-    classifier.fit(trainTfidfDF, trainLabels)
-    return classifier
-
-
-def trainModelNaiveBayes(folderWithFiles, matrixData):
-    trainLabels = loadLabelsFromFolders(folderWithFiles)
-    trainTfidfDF = pd.read_csv(matrixData, header=None)
-    classifier = MultinomialNB()
-    classifier.fit(trainTfidfDF, trainLabels)
-    return classifier
-
-
-def trainModelLogisticRegression(folderWithFiles, matrixData):
-    trainLabels = loadLabelsFromFolders(folderWithFiles)
-    trainTfidfDF = pd.read_csv(matrixData, header=None)
-    classifier = LogisticRegression(max_iter=1000, random_state=42)
-    classifier.fit(trainTfidfDF, trainLabels)
-    return classifier
-
-
-def evaluateModel(classifier, folderWithFiles, dataMatrix):
+def evaluateModel(classifier, folderWithFiles, dataMatrix, title="", maxNumberOfFiles=None):
     # Wczytanie etykiet i danych testowych
-    labels = loadLabelsFromFolders(folderWithFiles)
+    labels = loadLabelsFromFolders(folderWithFiles, maxNumberOfFiles)
     tfidfDF = pd.read_csv(dataMatrix, header=None)
     # Przewidywanie i ocena wyników
     predictedLabels = classifier.predict(tfidfDF)
@@ -74,20 +66,8 @@ def evaluateModel(classifier, folderWithFiles, dataMatrix):
     sns.heatmap(confMatrix, annot=True, fmt="d", cmap="Blues", xticklabels=['Negative', 'Positive'], yticklabels=['Negative', 'Positive'])
     plt.xlabel("Predicted Label")
     plt.ylabel("True Label")
-    plt.title("Confusion Matrix")
+    plt.title(f"Confusion Matrix of {title}")
     plt.show()
-
-
-def trainAndEvaluateModel(trainFolder, testFolder, trainMatrix, testMatrix, trainFunction, modelName):
-    print(f"\n{'=' * 10} Training and Evaluating {modelName} {'=' * 10}")
-    # Trening modelu
-    classifier = trainFunction(trainFolder, trainMatrix)
-    # Ocena zbioru treningowego
-    print(f"\nEvaluation on Training Set ({modelName}):")
-    evaluateModel(classifier, trainFolder, trainMatrix)
-    # Ocena zbioru testowego
-    print(f"\nEvaluation on Test Set ({modelName}):")
-    evaluateModel(classifier, testFolder, testMatrix)
 
 
 if __name__ == "__main__":
@@ -99,12 +79,18 @@ if __name__ == "__main__":
 
     # Lista modeli do przetestowania
     models = [
-        (trainModelLinearSVC, "LinearSVC"),
-        (trainModelRandomForest, "Random Forest"),
-        (trainModelNaiveBayes, "Naive Bayes"),
-        (trainModelLogisticRegression, "Logistic Regression")
+        (LinearSVC, "LinearSVC", {}),
+        (RandomForestClassifier, "Random Forest", {"n_estimators": 100, "random_state": 42}),
+        (MultinomialNB, "Naive Bayes", {}),
+        (LogisticRegression, "Logistic Regression", {"max_iter": 1000, "random_state": 42})
     ]
 
+    maxNFiles = 1000
     # Trening i ocena dla każdego modelu
-    for trainModel, modelName in models:
-        trainAndEvaluateModel(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, trainModel, modelName)
+    for trainModelFunction, modelName, trainModelParams in models:
+        print(f"\n{'=' * 10} Training and Evaluating {modelName} {'=' * 10}")
+        movieClassifier = trainModel(trainFolderPath, trainMatrixFile, trainModelFunction, **trainModelParams, maxNumberOfFiles=maxNFiles)
+        print(f"\nEvaluation on Training Set ({modelName}):")
+        evaluateModel(movieClassifier, trainFolderPath, trainMatrixFile, f"training {modelName}", maxNumberOfFiles=maxNFiles)
+        print(f"\nEvaluation on Test Set ({modelName}):")
+        evaluateModel(movieClassifier, testFolderPath, testMatrixFile, f"test {modelName}", maxNumberOfFiles=maxNFiles)

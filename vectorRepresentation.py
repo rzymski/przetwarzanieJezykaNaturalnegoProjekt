@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-def loadFilesFromFolder(inputFolder, maxNumberOfFiles=1000):
+def loadFilesFromFolder(inputFolder, maxNumberOfFiles=None):
     documents = []
     for subfolder in ['neg', 'pos']:
         folderPath = os.path.join(inputFolder, subfolder)
@@ -14,7 +14,7 @@ def loadFilesFromFolder(inputFolder, maxNumberOfFiles=1000):
                 with open(filePath, 'r', encoding='utf-8') as f:
                     content = f.read()
                     documents.append(content)
-                if index >= maxNumberOfFiles:
+                if maxNumberOfFiles and index >= maxNumberOfFiles:
                     print(f"✔️ Wczytano maksymalną liczbę plików ({maxNumberOfFiles}) z folderu: {folderPath}")
                     break
     print(f"✔️ Wczytano wszystkie dokumenty (łącznie: {len(documents)}).")
@@ -34,25 +34,20 @@ def saveInChunks(matrix, outputPath, chunkSize=5000):
         print(f"✅ Zapisano wiersze od {start} do {end}.")
 
 
-def createVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, chunkSize=1000):
-    print("🚀 Rozpoczynanie procesu tworzenia reprezentacji wektorowych...")
+def createVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, chunkSize=1000, maxNumberOfFiles=None):
     # Wczytaj dokumenty z folderów treningowych i testowych
     print("🔄 Rozpoczynanie wczytywania dokumentów treningowych i testowych...")
-    trainDocuments = loadFilesFromFolder(trainFolder)
-    testDocuments = loadFilesFromFolder(testFolder)
-
+    trainDocuments = loadFilesFromFolder(trainFolder, maxNumberOfFiles)
+    testDocuments = loadFilesFromFolder(testFolder, maxNumberOfFiles)
     # Oblicz macierz TF-IDF
     print("🔧 Rozpoczynanie obliczania macierzy TF-IDF...")
     vectorizer = TfidfVectorizer(token_pattern=r"(?u)\b\w\w+\b")    
     trainTfidfMatrix = vectorizer.fit_transform(trainDocuments)
     testTfidfMatrix = vectorizer.transform(testDocuments)
     print("✅ Obliczono macierz TF-IDF.")
-
     # Zapisuj macierze TF-IDF partiami do plików CSV
     saveInChunks(trainTfidfMatrix, trainOutput, chunkSize)
     saveInChunks(testTfidfMatrix, testOutput, chunkSize)
-    print("✔️ Proces tworzenia reprezentacji wektorowych zakończony.")
-
 
 
 if __name__ == "__main__":
@@ -60,4 +55,6 @@ if __name__ == "__main__":
     testFolderPath = 'dataProcessed/test'
     trainMatrixFile = 'trainingMatrix.csv'
     testMatrixFile = 'testMatrix.csv'
-    createVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile)
+    print("🚀 Rozpoczynanie procesu tworzenia reprezentacji wektorowych...")
+    createVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=1000)
+    print("✔️ Proces tworzenia reprezentacji wektorowych zakończony.")
