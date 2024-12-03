@@ -3,17 +3,20 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-def loadFilesFromFolder(inputFolder):
+def loadFilesFromFolder(inputFolder, maxNumberOfFiles=1000):
     documents = []
     print("📂 Rozpoczynanie wczytywania dokumentów z folderu:", inputFolder)
     for root, dirs, files in os.walk(inputFolder):
-        for file in files:
+        for index, file in enumerate(files, 1):
             if file.endswith('.txt'):
                 filePath = os.path.join(root, file)
                 with open(filePath, 'r', encoding='utf-8') as f:
                     content = f.read()
                     documents.append(content)
                 print(f"📄 Wczytano plik: {filePath}")
+            if index >= maxNumberOfFiles:
+                print(f"✔️ Wczytano {maxNumberOfFiles=} dokumenty.")
+                return documents
     print("✔️ Wczytano wszystkie dokumenty.")
     return documents
 
