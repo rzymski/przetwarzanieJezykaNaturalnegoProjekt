@@ -1,0 +1,210 @@
+D:\programowanie\python\przetwarzanieJezykaNaturalnego\projekt\venv\Scripts\python.exe D:\programowanie\python\przetwarzanieJezykaNaturalnego\projekt\main.py 
+?? Rozpoczynanie lematyzacji danych w katalogu: data
+?? Rozpoczynanie przetwarzania plik車w w folderze: data\train/pos
+?? Zako里czono przetwarzanie plik車w w folderze: data\train/pos
+?? Rozpoczynanie przetwarzania plik車w w folderze: data\train/neg
+?? Zako里czono przetwarzanie plik車w w folderze: data\train/neg
+?? Rozpoczynanie przetwarzania plik車w w folderze: data\test/pos
+?? Zako里czono przetwarzanie plik車w w folderze: data\test/pos
+?? Rozpoczynanie przetwarzania plik車w w folderze: data\test/neg
+?? Zako里czono przetwarzanie plik車w w folderze: data\test/neg
+?? Przetwarzanie plik車w zako里czone!
+?? Rozpoczynanie wczytywania dokument車w treningowych i testowych...
+?? Rozpoczynanie wczytywania dokument車w z folderu: dataProcessed/train\neg
+?? Rozpoczynanie wczytywania dokument車w z folderu: dataProcessed/train\pos
+?? Wczytano wszystkie dokumenty (??cznie: 25000).
+?? Rozpoczynanie wczytywania dokument車w z folderu: dataProcessed/test\neg
+?? Rozpoczynanie wczytywania dokument車w z folderu: dataProcessed/test\pos
+?? Wczytano wszystkie dokumenty (??cznie: 25000).
+?? Rozpoczynanie obliczania macierzy TF-IDF...
+? Obliczono macierz TF-IDF.
+?? Zapisuj? macierz do pliku trainingMatrix.csv w partiach po 1000 wierszy...
+? Zapisano wiersze od 0 do 1000.
+? Zapisano wiersze od 1000 do 2000.
+? Zapisano wiersze od 2000 do 3000.
+? Zapisano wiersze od 3000 do 4000.
+? Zapisano wiersze od 4000 do 5000.
+? Zapisano wiersze od 5000 do 6000.
+? Zapisano wiersze od 6000 do 7000.
+? Zapisano wiersze od 7000 do 8000.
+? Zapisano wiersze od 8000 do 9000.
+? Zapisano wiersze od 9000 do 10000.
+? Zapisano wiersze od 10000 do 11000.
+? Zapisano wiersze od 11000 do 12000.
+? Zapisano wiersze od 12000 do 13000.
+? Zapisano wiersze od 13000 do 14000.
+? Zapisano wiersze od 14000 do 15000.
+? Zapisano wiersze od 15000 do 16000.
+? Zapisano wiersze od 16000 do 17000.
+? Zapisano wiersze od 17000 do 18000.
+? Zapisano wiersze od 18000 do 19000.
+? Zapisano wiersze od 19000 do 20000.
+? Zapisano wiersze od 20000 do 21000.
+? Zapisano wiersze od 21000 do 22000.
+? Zapisano wiersze od 22000 do 23000.
+? Zapisano wiersze od 23000 do 24000.
+? Zapisano wiersze od 24000 do 25000.
+?? Zapisuj? macierz do pliku testMatrix.csv w partiach po 1000 wierszy...
+? Zapisano wiersze od 0 do 1000.
+? Zapisano wiersze od 1000 do 2000.
+? Zapisano wiersze od 2000 do 3000.
+? Zapisano wiersze od 3000 do 4000.
+? Zapisano wiersze od 4000 do 5000.
+? Zapisano wiersze od 5000 do 6000.
+? Zapisano wiersze od 6000 do 7000.
+? Zapisano wiersze od 7000 do 8000.
+? Zapisano wiersze od 8000 do 9000.
+? Zapisano wiersze od 9000 do 10000.
+? Zapisano wiersze od 10000 do 11000.
+? Zapisano wiersze od 11000 do 12000.
+? Zapisano wiersze od 12000 do 13000.
+? Zapisano wiersze od 13000 do 14000.
+? Zapisano wiersze od 14000 do 15000.
+? Zapisano wiersze od 15000 do 16000.
+? Zapisano wiersze od 16000 do 17000.
+? Zapisano wiersze od 17000 do 18000.
+? Zapisano wiersze od 18000 do 19000.
+? Zapisano wiersze od 19000 do 20000.
+? Zapisano wiersze od 20000 do 21000.
+? Zapisano wiersze od 21000 do 22000.
+? Zapisano wiersze od 22000 do 23000.
+? Zapisano wiersze od 23000 do 24000.
+? Zapisano wiersze od 24000 do 25000.
+
+========== Training and Evaluating LinearSVC ==========
+?? Wczytano wszystkie etykiety (??cznie: 25000).
+? Model LinearSVC trained successfully with parameters: {}
+
+Evaluation on Training Set (LinearSVC):
+?? Wczytano wszystkie etykiety (??cznie: 25000).
+Accuracy: 0.99
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    Negative       0.99      0.99      0.99     12500
+    Positive       0.99      0.99      0.99     12500
+
+    accuracy                           0.99     25000
+   macro avg       0.99      0.99      0.99     25000
+weighted avg       0.99      0.99      0.99     25000
+
+
+Evaluation on Test Set (LinearSVC):
+?? Wczytano wszystkie etykiety (??cznie: 25000).
+Accuracy: 0.86
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    Negative       0.85      0.87      0.86     12500
+    Positive       0.87      0.84      0.85     12500
+
+    accuracy                           0.86     25000
+   macro avg       0.86      0.86      0.86     25000
+weighted avg       0.86      0.86      0.86     25000
+
+
+========== Training and Evaluating Random Forest ==========
+?? Wczytano wszystkie etykiety (??cznie: 25000).
+? Model RandomForestClassifier trained successfully with parameters: {'n_estimators': 100, 'random_state': 42}
+
+Evaluation on Training Set (Random Forest):
+?? Wczytano wszystkie etykiety (??cznie: 25000).
+Accuracy: 1.00
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    Negative       1.00      1.00      1.00     12500
+    Positive       1.00      1.00      1.00     12500
+
+    accuracy                           1.00     25000
+   macro avg       1.00      1.00      1.00     25000
+weighted avg       1.00      1.00      1.00     25000
+
+
+Evaluation on Test Set (Random Forest):
+?? Wczytano wszystkie etykiety (??cznie: 25000).
+Accuracy: 0.84
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    Negative       0.83      0.86      0.84     12500
+    Positive       0.85      0.83      0.84     12500
+
+    accuracy                           0.84     25000
+   macro avg       0.84      0.84      0.84     25000
+weighted avg       0.84      0.84      0.84     25000
+
+
+========== Training and Evaluating Naive Bayes ==========
+?? Wczytano wszystkie etykiety (??cznie: 25000).
+? Model MultinomialNB trained successfully with parameters: {}
+
+Evaluation on Training Set (Naive Bayes):
+?? Wczytano wszystkie etykiety (??cznie: 25000).
+Accuracy: 0.91
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    Negative       0.90      0.92      0.91     12500
+    Positive       0.92      0.90      0.91     12500
+
+    accuracy                           0.91     25000
+   macro avg       0.91      0.91      0.91     25000
+weighted avg       0.91      0.91      0.91     25000
+
+
+Evaluation on Test Set (Naive Bayes):
+?? Wczytano wszystkie etykiety (??cznie: 25000).
+Accuracy: 0.82
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    Negative       0.80      0.87      0.83     12500
+    Positive       0.86      0.78      0.82     12500
+
+    accuracy                           0.82     25000
+   macro avg       0.83      0.82      0.82     25000
+weighted avg       0.83      0.82      0.82     25000
+
+
+========== Training and Evaluating Logistic Regression ==========
+?? Wczytano wszystkie etykiety (??cznie: 25000).
+? Model LogisticRegression trained successfully with parameters: {'max_iter': 1000, 'random_state': 42}
+
+Evaluation on Training Set (Logistic Regression):
+?? Wczytano wszystkie etykiety (??cznie: 25000).
+Accuracy: 0.93
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    Negative       0.94      0.92      0.93     12500
+    Positive       0.92      0.94      0.93     12500
+
+    accuracy                           0.93     25000
+   macro avg       0.93      0.93      0.93     25000
+weighted avg       0.93      0.93      0.93     25000
+
+
+Evaluation on Test Set (Logistic Regression):
+?? Wczytano wszystkie etykiety (??cznie: 25000).
+Accuracy: 0.87
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    Negative       0.87      0.87      0.87     12500
+    Positive       0.87      0.87      0.87     12500
+
+    accuracy                           0.87     25000
+   macro avg       0.87      0.87      0.87     25000
+weighted avg       0.87      0.87      0.87     25000
+
+
+Process finished with exit code 0
