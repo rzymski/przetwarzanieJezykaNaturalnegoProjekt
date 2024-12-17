@@ -48,7 +48,7 @@ def trainModel(folderWithFiles, matrixData, modelTrainFunction, maxNumberOfFiles
     return classifier
 
 
-def evaluateModel(classifier, folderWithFiles, dataMatrix, title="", maxNumberOfFiles=None):
+def evaluateModel(classifier, folderWithFiles, dataMatrix, title="", maxNumberOfFiles=None, drawPlots=False):
     # Wczytanie etykiet i danych testowych
     labels = loadLabelsFromFolders(folderWithFiles, maxNumberOfFiles)
     tfidfDF = pd.read_csv(dataMatrix, header=None)
@@ -61,13 +61,15 @@ def evaluateModel(classifier, folderWithFiles, dataMatrix, title="", maxNumberOf
     print("\nClassification Report:")
     print(report)
     # Macierz pomyłek (wykres)
-    confMatrix = confusion_matrix(labels, predictedLabels)
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(confMatrix, annot=True, fmt="d", cmap="Blues", xticklabels=['Negative', 'Positive'], yticklabels=['Negative', 'Positive'])
-    plt.xlabel("Predicted Label")
-    plt.ylabel("True Label")
-    plt.title(f"Confusion Matrix of {title}")
-    plt.show()
+    if drawPlots:
+        confMatrix = confusion_matrix(labels, predictedLabels)
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(confMatrix, annot=True, fmt="d", cmap="Blues", xticklabels=['Negative', 'Positive'], yticklabels=['Negative', 'Positive'])
+        plt.xlabel("Predicted Label")
+        plt.ylabel("True Label")
+        plt.title(f"Confusion Matrix of {title}")
+        plt.show()
+    return accuracy
 
 
 if __name__ == "__main__":
