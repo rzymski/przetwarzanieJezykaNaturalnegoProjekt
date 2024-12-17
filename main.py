@@ -78,14 +78,14 @@ def main(lemmatize=False, createVectorTFIDF=False, maxNumberOfFiles=None, drawPl
     pd.set_option("display.max_columns", None)
     print("\n=== Summary of Results ===")
     print(resultsDf)
-    resultsDf.to_csv("resultsSummary.csv", index=False)
+    resultsDf.to_csv("resultsSummary.txt", index=False)
 
     # Wyświetlanie najlepszych wyników dla każdego modelu
     print("\n=== Best Results for Each Model ===")
     for modelName in resultsDf['Model'].unique():
-        best_result = resultsDf[resultsDf['Model'] == modelName].sort_values(by='Test Accuracy', ascending=False).iloc[0]
+        bestResult = resultsDf[resultsDf['Model'] == modelName].sort_values(by='Test Accuracy', ascending=False).iloc[0]
         print(f"\nBest result for {modelName}:")
-        print(best_result)
+        print(bestResult)
 
 
 if __name__ == "__main__":

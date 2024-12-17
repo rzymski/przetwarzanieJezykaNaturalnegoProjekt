@@ -1,0 +1,85 @@
+Model,Parameters,Train Accuracy,Test Accuracy
+LinearSVC,"{'C': 0.5, 'max_iter': 1000, 'loss': 'hinge'}",0.9855,0.848
+LinearSVC,"{'C': 0.5, 'max_iter': 1000, 'loss': 'squared_hinge'}",0.998,0.8395
+LinearSVC,"{'C': 0.5, 'max_iter': 100, 'loss': 'hinge'}",0.9855,0.848
+LinearSVC,"{'C': 0.5, 'max_iter': 100, 'loss': 'squared_hinge'}",0.998,0.8395
+LinearSVC,"{'C': 0.5, 'max_iter': 10000, 'loss': 'hinge'}",0.9855,0.848
+LinearSVC,"{'C': 0.5, 'max_iter': 10000, 'loss': 'squared_hinge'}",0.998,0.8395
+LinearSVC,"{'C': 1.0, 'max_iter': 1000, 'loss': 'hinge'}",0.997,0.821
+LinearSVC,"{'C': 1.0, 'max_iter': 1000, 'loss': 'squared_hinge'}",1.0,0.8245
+LinearSVC,"{'C': 1.0, 'max_iter': 100, 'loss': 'hinge'}",0.997,0.821
+LinearSVC,"{'C': 1.0, 'max_iter': 100, 'loss': 'squared_hinge'}",1.0,0.8245
+LinearSVC,"{'C': 1.0, 'max_iter': 10000, 'loss': 'hinge'}",0.997,0.8205
+LinearSVC,"{'C': 1.0, 'max_iter': 10000, 'loss': 'squared_hinge'}",1.0,0.8245
+LinearSVC,"{'C': 2.0, 'max_iter': 1000, 'loss': 'hinge'}",0.9995,0.8095
+LinearSVC,"{'C': 2.0, 'max_iter': 1000, 'loss': 'squared_hinge'}",1.0,0.8165
+LinearSVC,"{'C': 2.0, 'max_iter': 100, 'loss': 'hinge'}",0.9995,0.8095
+LinearSVC,"{'C': 2.0, 'max_iter': 100, 'loss': 'squared_hinge'}",1.0,0.8165
+LinearSVC,"{'C': 2.0, 'max_iter': 10000, 'loss': 'hinge'}",0.9995,0.8095
+LinearSVC,"{'C': 2.0, 'max_iter': 10000, 'loss': 'squared_hinge'}",1.0,0.8165
+Random Forest,"{'n_estimators': 50, 'max_depth': 5, 'min_samples_split': 2}",0.9035,0.797
+Random Forest,"{'n_estimators': 50, 'max_depth': 5, 'min_samples_split': 5}",0.881,0.7785
+Random Forest,"{'n_estimators': 50, 'max_depth': 5, 'min_samples_split': 10}",0.8685,0.78
+Random Forest,"{'n_estimators': 50, 'max_depth': 10, 'min_samples_split': 2}",0.945,0.819
+Random Forest,"{'n_estimators': 50, 'max_depth': 10, 'min_samples_split': 5}",0.9315,0.813
+Random Forest,"{'n_estimators': 50, 'max_depth': 10, 'min_samples_split': 10}",0.9345,0.8185
+Random Forest,"{'n_estimators': 50, 'max_depth': None, 'min_samples_split': 2}",1.0,0.836
+Random Forest,"{'n_estimators': 50, 'max_depth': None, 'min_samples_split': 5}",1.0,0.8295
+Random Forest,"{'n_estimators': 50, 'max_depth': None, 'min_samples_split': 10}",1.0,0.8325
+Random Forest,"{'n_estimators': 100, 'max_depth': 5, 'min_samples_split': 2}",0.909,0.8135
+Random Forest,"{'n_estimators': 100, 'max_depth': 5, 'min_samples_split': 5}",0.92,0.815
+Random Forest,"{'n_estimators': 100, 'max_depth': 5, 'min_samples_split': 10}",0.9135,0.809
+Random Forest,"{'n_estimators': 100, 'max_depth': 10, 'min_samples_split': 2}",0.955,0.829
+Random Forest,"{'n_estimators': 100, 'max_depth': 10, 'min_samples_split': 5}",0.954,0.8385
+Random Forest,"{'n_estimators': 100, 'max_depth': 10, 'min_samples_split': 10}",0.953,0.836
+Random Forest,"{'n_estimators': 100, 'max_depth': None, 'min_samples_split': 2}",1.0,0.834
+Random Forest,"{'n_estimators': 100, 'max_depth': None, 'min_samples_split': 5}",1.0,0.8355
+Random Forest,"{'n_estimators': 100, 'max_depth': None, 'min_samples_split': 10}",1.0,0.838
+Random Forest,"{'n_estimators': 200, 'max_depth': 5, 'min_samples_split': 2}",0.929,0.8385
+Random Forest,"{'n_estimators': 200, 'max_depth': 5, 'min_samples_split': 5}",0.92,0.826
+Random Forest,"{'n_estimators': 200, 'max_depth': 5, 'min_samples_split': 10}",0.9345,0.827
+Random Forest,"{'n_estimators': 200, 'max_depth': 10, 'min_samples_split': 2}",0.9575,0.8205
+Random Forest,"{'n_estimators': 200, 'max_depth': 10, 'min_samples_split': 5}",0.9655,0.8345
+Random Forest,"{'n_estimators': 200, 'max_depth': 10, 'min_samples_split': 10}",0.9615,0.8465
+Random Forest,"{'n_estimators': 200, 'max_depth': None, 'min_samples_split': 2}",1.0,0.8535
+Random Forest,"{'n_estimators': 200, 'max_depth': None, 'min_samples_split': 5}",1.0,0.853
+Random Forest,"{'n_estimators': 200, 'max_depth': None, 'min_samples_split': 10}",1.0,0.8525
+Naive Bayes,"{'alpha': 0.1, 'fit_prior': True, 'force_alpha': True}",0.996,0.7965
+Naive Bayes,"{'alpha': 0.1, 'fit_prior': True, 'force_alpha': False}",0.996,0.7965
+Naive Bayes,"{'alpha': 0.1, 'fit_prior': False, 'force_alpha': True}",0.996,0.7965
+Naive Bayes,"{'alpha': 0.1, 'fit_prior': False, 'force_alpha': False}",0.996,0.7965
+Naive Bayes,"{'alpha': 1.0, 'fit_prior': True, 'force_alpha': True}",0.9845,0.837
+Naive Bayes,"{'alpha': 1.0, 'fit_prior': True, 'force_alpha': False}",0.9845,0.837
+Naive Bayes,"{'alpha': 1.0, 'fit_prior': False, 'force_alpha': True}",0.9845,0.837
+Naive Bayes,"{'alpha': 1.0, 'fit_prior': False, 'force_alpha': False}",0.9845,0.837
+Naive Bayes,"{'alpha': 2.0, 'fit_prior': True, 'force_alpha': True}",0.974,0.846
+Naive Bayes,"{'alpha': 2.0, 'fit_prior': True, 'force_alpha': False}",0.974,0.846
+Naive Bayes,"{'alpha': 2.0, 'fit_prior': False, 'force_alpha': True}",0.974,0.846
+Naive Bayes,"{'alpha': 2.0, 'fit_prior': False, 'force_alpha': False}",0.974,0.846
+Logistic Regression,"{'C': 0.5, 'solver': 'liblinear', 'max_iter': 1000}",0.9625,0.8535
+Logistic Regression,"{'C': 0.5, 'solver': 'liblinear', 'max_iter': 100}",0.9625,0.8535
+Logistic Regression,"{'C': 0.5, 'solver': 'liblinear', 'max_iter': 10000}",0.9625,0.8535
+Logistic Regression,"{'C': 0.5, 'solver': 'lbfgs', 'max_iter': 1000}",0.9625,0.8535
+Logistic Regression,"{'C': 0.5, 'solver': 'lbfgs', 'max_iter': 100}",0.9625,0.8535
+Logistic Regression,"{'C': 0.5, 'solver': 'lbfgs', 'max_iter': 10000}",0.9625,0.8535
+Logistic Regression,"{'C': 0.5, 'solver': 'saga', 'max_iter': 1000}",0.9625,0.8535
+Logistic Regression,"{'C': 0.5, 'solver': 'saga', 'max_iter': 100}",0.9625,0.8535
+Logistic Regression,"{'C': 0.5, 'solver': 'saga', 'max_iter': 10000}",0.9625,0.8535
+Logistic Regression,"{'C': 1.0, 'solver': 'liblinear', 'max_iter': 1000}",0.9765,0.852
+Logistic Regression,"{'C': 1.0, 'solver': 'liblinear', 'max_iter': 100}",0.9765,0.852
+Logistic Regression,"{'C': 1.0, 'solver': 'liblinear', 'max_iter': 10000}",0.9765,0.852
+Logistic Regression,"{'C': 1.0, 'solver': 'lbfgs', 'max_iter': 1000}",0.9765,0.853
+Logistic Regression,"{'C': 1.0, 'solver': 'lbfgs', 'max_iter': 100}",0.9765,0.853
+Logistic Regression,"{'C': 1.0, 'solver': 'lbfgs', 'max_iter': 10000}",0.9765,0.853
+Logistic Regression,"{'C': 1.0, 'solver': 'saga', 'max_iter': 1000}",0.9765,0.852
+Logistic Regression,"{'C': 1.0, 'solver': 'saga', 'max_iter': 100}",0.9765,0.852
+Logistic Regression,"{'C': 1.0, 'solver': 'saga', 'max_iter': 10000}",0.9765,0.852
+Logistic Regression,"{'C': 2.0, 'solver': 'liblinear', 'max_iter': 1000}",0.9945,0.8555
+Logistic Regression,"{'C': 2.0, 'solver': 'liblinear', 'max_iter': 100}",0.9945,0.8555
+Logistic Regression,"{'C': 2.0, 'solver': 'liblinear', 'max_iter': 10000}",0.9945,0.8555
+Logistic Regression,"{'C': 2.0, 'solver': 'lbfgs', 'max_iter': 1000}",0.9945,0.8545
+Logistic Regression,"{'C': 2.0, 'solver': 'lbfgs', 'max_iter': 100}",0.9945,0.8545
+Logistic Regression,"{'C': 2.0, 'solver': 'lbfgs', 'max_iter': 10000}",0.9945,0.8545
+Logistic Regression,"{'C': 2.0, 'solver': 'saga', 'max_iter': 1000}",0.9945,0.856
+Logistic Regression,"{'C': 2.0, 'solver': 'saga', 'max_iter': 100}",0.9945,0.856
+Logistic Regression,"{'C': 2.0, 'solver': 'saga', 'max_iter': 10000}",0.9945,0.856
