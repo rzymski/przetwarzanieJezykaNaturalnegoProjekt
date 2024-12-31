@@ -3,13 +3,13 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from lemmatization import lemmatizeData
-from vectorRepresentation import createVectorRepresentations
+from vectorRepresentation import createTFIDFVectorRepresentations, createBagOfWordsVectorRepresentations, createWord2VecVectorRepresentations
 from modelTraining import trainModel, evaluateModel
 import pandas as pd
 from itertools import product
 
 
-def main(lemmatize=False, createVectorTFIDF=False, maxNumberOfFiles=None, drawPlots=False):
+def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=False):
     inputDir = 'data'
     outputDir = 'dataProcessed'
     if lemmatize:
@@ -18,10 +18,14 @@ def main(lemmatize=False, createVectorTFIDF=False, maxNumberOfFiles=None, drawPl
     # Ścieżki do folderów i plików wyjściowych
     trainFolderPath = f'{outputDir}/train'
     testFolderPath = f'{outputDir}/test'
-    trainMatrixFile = 'trainingMatrix.csv'
-    testMatrixFile = 'testMatrix.csv'
-    if createVectorTFIDF:
-        createVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=maxNumberOfFiles)
+    trainMatrixFile = f"trainingMatrix{createVector}{maxNumberOfFiles if maxNumberOfFiles else ''}.csv"
+    testMatrixFile = f"testMatrix{createVector}{maxNumberOfFiles if maxNumberOfFiles else ''}.csv"
+    if createVector == "TFIDF":
+        createTFIDFVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=maxNumberOfFiles)
+    elif createVector == "BagOfWords":
+        createBagOfWordsVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=maxNumberOfFiles)
+    elif createVector == "Word2Vec":
+        createWord2VecVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=maxNumberOfFiles)
 
     # Lista modeli z parametrami
     models = [
@@ -35,11 +39,11 @@ def main(lemmatize=False, createVectorTFIDF=False, maxNumberOfFiles=None, drawPl
             {"max_depth": [5, 10, None]},
             {"min_samples_split": [2, 5, 10]}
         ]),
-        (MultinomialNB, "Naive Bayes", [
-            {"alpha": [0.1, 1.0, 2.0]},
-            {"fit_prior": [True, False]},
-            {"force_alpha": [True, False]}
-        ]),
+        # (MultinomialNB, "Naive Bayes", [
+        #     {"alpha": [0.1, 1.0, 2.0]},
+        #     {"fit_prior": [True, False]},
+        #     {"force_alpha": [True, False]}
+        # ]),
         (LogisticRegression, "Logistic Regression", [
             {"C": [0.5, 1.0, 2.0]},
             {"solver": ["liblinear", "lbfgs", "saga"]},
@@ -78,7 +82,7 @@ def main(lemmatize=False, createVectorTFIDF=False, maxNumberOfFiles=None, drawPl
     pd.set_option("display.max_columns", None)
     print("\n=== Summary of Results ===")
     print(resultsDf)
-    resultsDf.to_csv("resultsSummary.txt", index=False)
+    resultsDf.to_excel(f"resultsSummary{createVector}{maxNumberOfFiles if maxNumberOfFiles else ''}.xlsx", index=True)
 
     # Wyświetlanie najlepszych wyników dla każdego modelu
     print("\n=== Best Results for Each Model ===")
@@ -89,6 +93,8 @@ def main(lemmatize=False, createVectorTFIDF=False, maxNumberOfFiles=None, drawPl
 
 
 if __name__ == "__main__":
-    main(createVectorTFIDF=True, maxNumberOfFiles=1000)
-    # main(lemmatize=True, createVectorTFIDF=True, maxNumberOfFiles=None)
+    main(maxNumberOfFiles=2500, createVector="TFIDF")
+    main(maxNumberOfFiles=2500, createVector="BagOfWords")
+    main(maxNumberOfFiles=2500, createVector="Word2Vec")
+    # main(lemmatize=True, createVector="TFIDF", maxNumberOfFiles=None)
     # main()

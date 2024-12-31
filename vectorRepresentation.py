@@ -1,6 +1,10 @@
 import os
 import pandas as pd
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
+from gensim.models import Word2Vec
+from gensim.utils import simple_preprocess
 
 
 def loadFilesFromFolder(inputFolder, maxNumberOfFiles=None):
@@ -34,7 +38,7 @@ def saveInChunks(matrix, outputPath, chunkSize=5000):
         print(f"✅ Zapisano wiersze od {start} do {end}.")
 
 
-def createVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, chunkSize=1000, maxNumberOfFiles=None):
+def createTFIDFVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, chunkSize=1000, maxNumberOfFiles=None):
     # Wczytaj dokumenty z folderów treningowych i testowych
     print("🔄 Rozpoczynanie wczytywania dokumentów treningowych i testowych...")
     trainDocuments = loadFilesFromFolder(trainFolder, maxNumberOfFiles)
@@ -50,11 +54,59 @@ def createVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput
     saveInChunks(testTfidfMatrix, testOutput, chunkSize)
 
 
+def createBagOfWordsVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, chunkSize=1000, maxNumberOfFiles=None):
+    # Wczytaj dokumenty z folderów treningowych i testowych
+    print("🔄 Rozpoczynanie wczytywania dokumentów treningowych i testowych...")
+    trainDocuments = loadFilesFromFolder(trainFolder, maxNumberOfFiles)
+    testDocuments = loadFilesFromFolder(testFolder, maxNumberOfFiles)
+    # Oblicz macierz Count Vectorizer
+    print("🔧 Rozpoczynanie obliczania macierzy Count Vectorizer...")
+    vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w\w+\b")
+    trainCountMatrix = vectorizer.fit_transform(trainDocuments)
+    testCountMatrix = vectorizer.transform(testDocuments)
+    print("✔️ Obliczono macierz Count Vectorizer.")
+    # Zapisuj macierze Count Vectorizer partiami do plików CSV
+    saveInChunks(trainCountMatrix, trainOutput, chunkSize)
+    saveInChunks(testCountMatrix, testOutput, chunkSize)
+
+
+def createWord2VecVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, vectorSize=100, window=5, minCount=1, workers=4, maxNumberOfFiles=None):
+    # Wczytaj dokumenty z folderów treningowych i testowych
+    print("🔄 Rozpoczynanie wczytywania dokumentów treningowych i testowych do Word2Vec...")
+    trainDocuments = loadFilesFromFolder(trainFolder, maxNumberOfFiles)
+    testDocuments = loadFilesFromFolder(testFolder, maxNumberOfFiles)
+    # Tokenizacja dokumentów do listy list tokenów
+    print("🔧 Tokenizacja dokumentów...")
+    tokenizedDocuments = [simple_preprocess(doc) for doc in trainDocuments + testDocuments]
+    # Trening modelu Word2Vec
+    print("📚 Trening modelu Word2Vec...")
+    word2vecModel = Word2Vec(sentences=tokenizedDocuments, vector_size=vectorSize, window=window, min_count=minCount, workers=workers)
+
+    # Funkcja do konwersji dokumentów na wektory
+    def documentToVector(doc, model):
+        tokens = simple_preprocess(doc)
+        vectors = [model.wv[token] for token in tokens if token in model.wv]
+        if vectors:
+            return np.mean(vectors, axis=0)
+        else:
+            return np.zeros(vectorSize)
+
+    # Konwersja dokumentów na macierze wektorów
+    print("🔄 Konwersja dokumentów na macierze wektorów Word2Vec...")
+    trainVectors = [documentToVector(doc, word2vecModel) for doc in trainDocuments]
+    testVectors = [documentToVector(doc, word2vecModel) for doc in testDocuments]
+    # Zapis wektorów do plików CSV
+    print("💾 Zapis wektorów Word2Vec do plików CSV...")
+    pd.DataFrame(trainVectors).to_csv(trainOutput, index=False, header=False)
+    pd.DataFrame(testVectors).to_csv(testOutput, index=False, header=False)
+    print("✔️ Zakończono zapis wektorów Word2Vec.")
+
+
 if __name__ == "__main__":
     trainFolderPath = 'dataProcessed/train'
     testFolderPath = 'dataProcessed/test'
     trainMatrixFile = 'trainingMatrix.csv'
     testMatrixFile = 'testMatrix.csv'
     print("🚀 Rozpoczynanie procesu tworzenia reprezentacji wektorowych...")
-    createVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=1000)
+    createTFIDFVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=1000)
     print("✔️ Proces tworzenia reprezentacji wektorowych zakończony.")
