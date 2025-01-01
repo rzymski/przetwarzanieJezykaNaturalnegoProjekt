@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_auc_score
 import seaborn as sns
 import matplotlib.pyplot as plt
+from utils import measureExecutionTime
 
 
 def loadLabelsFromFolders(folder, maxNumberOfFiles=None):
@@ -13,12 +14,13 @@ def loadLabelsFromFolders(folder, maxNumberOfFiles=None):
         numFiles = len([file for file in os.listdir(folderPath) if file.endswith('.txt')])
         if maxNumberOfFiles:
             numFiles = min(numFiles, maxNumberOfFiles)
-            print(f"✔️ Ograniczono liczbę plików w {subFolder} do {maxNumberOfFiles}.")
+            # print(f"✔️ Ograniczono liczbę plików w {subFolder} do {maxNumberOfFiles}.")
         labels.extend([0 if subFolder == 'neg' else 1] * numFiles)
-    print(f"✔️ Wczytano wszystkie etykiety (łącznie: {len(labels)}).")
+    # print(f"✔️ Wczytano wszystkie etykiety (łącznie: {len(labels)}).")
     return labels
 
 
+@measureExecutionTime
 def trainModel(folderWithFiles, matrixData, modelTrainFunction, maxNumberOfFiles=None, **modelParams):
     # Load labels and data
     trainLabels = loadLabelsFromFolders(folderWithFiles, maxNumberOfFiles)
@@ -34,6 +36,7 @@ def trainModel(folderWithFiles, matrixData, modelTrainFunction, maxNumberOfFiles
     return classifier
 
 
+@measureExecutionTime
 def evaluateModel(classifier, folderWithFiles, dataMatrix, title="", maxNumberOfFiles=None, drawPlots=False):
     # Wczytanie etykiet i danych testowych
     labels = loadLabelsFromFolders(folderWithFiles, maxNumberOfFiles)
@@ -57,8 +60,8 @@ def evaluateModel(classifier, folderWithFiles, dataMatrix, title="", maxNumberOf
     print(f"AUC-ROC: {auc:.2f}" if auc is not None else "AUC-ROC: Not available")
     # Raport klasyfikacji
     report = classification_report(labels, predictedLabels, target_names=['Negative', 'Positive'])
-    print("\nClassification Report:")
-    print(report)
+    # print("\nClassification Report:")
+    # print(report)
     # Macierz pomyłek (wykres)
     if drawPlots:
         confMatrix = confusion_matrix(labels, predictedLabels)

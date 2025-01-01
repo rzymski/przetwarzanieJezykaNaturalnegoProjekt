@@ -46,18 +46,18 @@ def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=Fals
     # Lista modeli z parametrami
     models = [
         (LinearSVC, "LinearSVC", [
-            {"C": [0.2, 0.25, 0.5, 1.0, 2.0]},
+            {"C": [0.15, 0.2, 0.25, 0.5, 1.0, 2.0]},
             {"max_iter": [1000, 100, 10000]},
             {"loss": ["hinge", "squared_hinge"]},
             {"tol": [1e-3, 1e-4]},
         ]),
         (RandomForestClassifier, "Random Forest", [
-            {"n_estimators": [500, 1000, 2000]},
+            {"n_estimators": [500, 1000, 1500]},
             {"max_depth": [5, 10, None]},
             {"min_samples_split": [2, 5, 10]}
         ]),
         (LogisticRegression, "Logistic Regression", [
-            {"C": [0.5, 1.0, 1.2, 2.0]},
+            {"C": [0.5, 1.0, 1.2, 1.5, 2.0]},
             {"solver": ["liblinear", "lbfgs", "saga"]},
             {"max_iter": [1000, 100, 10000]},
             {"tol": [1e-3, 1e-4]},
@@ -82,11 +82,11 @@ def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=Fals
 
         for paramCombination in product(*paramValues):
             params = dict(zip(paramNames, paramCombination))
-            print(f"\n{'=' * 10} Training and Evaluating {modelName} with params {params} {'=' * 10}")
+            print(f"\n{'=' * 10} Training and Evaluating {createVector} {modelName} with params {params} {'=' * 10}")
             movieClassifier = trainModel(trainFolderPath, currentTrainData, trainModelFunction, **params, maxNumberOfFiles=maxNumberOfFiles)
-            print(f"\nEvaluation on Training Set ({modelName}):")
+            print(f"\nEvaluation on Training Set ({createVector} - {modelName}):")
             trainAccuracy, trainAUC = evaluateModel(movieClassifier, trainFolderPath, currentTrainData, f"training {modelName} {params}", maxNumberOfFiles=maxNumberOfFiles, drawPlots=drawPlots)
-            print(f"\nEvaluation on Test Set ({modelName}):")
+            print(f"\nEvaluation on Test Set ({createVector} - {modelName}):")
             testAccuracy, testAUC = evaluateModel(movieClassifier, testFolderPath, currentTestData, f"test {modelName} {params}", maxNumberOfFiles=maxNumberOfFiles, drawPlots=drawPlots)
             results.append({
                 "Model": modelName,
@@ -114,9 +114,9 @@ def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=Fals
 
 
 if __name__ == "__main__":
-    main(maxNumberOfFiles=2500, createVector="TFIDF")
-    main(maxNumberOfFiles=2500, createVector="BagOfWords")
-    main(maxNumberOfFiles=2500, createVector="Word2Vec")
+    main(maxNumberOfFiles=5000, createVector="TFIDF")
+    main(maxNumberOfFiles=5000, createVector="BagOfWords")
+    main(maxNumberOfFiles=5000, createVector="Word2Vec")
 
     # main(lemmatize=True, createVector="TFIDF", maxNumberOfFiles=None)
     # main()

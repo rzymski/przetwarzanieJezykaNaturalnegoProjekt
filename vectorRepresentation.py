@@ -5,13 +5,14 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from gensim.models import Word2Vec
 from gensim.utils import simple_preprocess
+from utils import measureExecutionTime
 
 
 def loadFilesFromFolder(inputFolder, maxNumberOfFiles=None):
     documents = []
     for subfolder in ['neg', 'pos']:
         folderPath = os.path.join(inputFolder, subfolder)
-        print(f"📂 Rozpoczynanie wczytywania dokumentów z folderu: {folderPath}")
+        # print(f"📂 Rozpoczynanie wczytywania dokumentów z folderu: {folderPath}")
         for index, file in enumerate(os.listdir(folderPath), 1):
             if file.endswith('.txt'):
                 filePath = os.path.join(folderPath, file)
@@ -19,25 +20,26 @@ def loadFilesFromFolder(inputFolder, maxNumberOfFiles=None):
                     content = f.read()
                     documents.append(content)
                 if maxNumberOfFiles and index >= maxNumberOfFiles:
-                    print(f"✔️ Wczytano maksymalną liczbę plików ({maxNumberOfFiles}) z folderu: {folderPath}")
+                    # print(f"✔️ Wczytano maksymalną liczbę plików ({maxNumberOfFiles}) z folderu: {folderPath}")
                     break
-    print(f"✔️ Wczytano wszystkie dokumenty (łącznie: {len(documents)}).")
+    # print(f"✔️ Wczytano wszystkie dokumenty (łącznie: {len(documents)}).")
     return documents
 
 
 def saveInChunks(matrix, outputPath, chunkSize=5000):
     if os.path.exists(outputPath):
         os.remove(outputPath)
-        print(f"🗑️ Usunięto istniejący plik: {outputPath}")
-    print(f"💾 Zapisuję macierz do pliku {outputPath} w partiach po {chunkSize} wierszy...")
+        # print(f"🗑️ Usunięto istniejący plik: {outputPath}")
+    # print(f"💾 Zapisuję macierz do pliku {outputPath} w partiach po {chunkSize} wierszy...")
     num_rows = matrix.shape[0]
     for start in range(0, num_rows, chunkSize):
         end = min(start + chunkSize, num_rows)
         chunk = matrix[start:end].toarray()
         pd.DataFrame(chunk).to_csv(outputPath, mode='a', header=False, index=False)
-        print(f"✅ Zapisano wiersze od {start} do {end}.")
+        # print(f"✅ Zapisano wiersze od {start} do {end}.")
 
 
+@measureExecutionTime
 def createTFIDFVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, chunkSize=1000, maxNumberOfFiles=None):
     # Wczytaj dokumenty z folderów treningowych i testowych
     print("🔄 Rozpoczynanie wczytywania dokumentów treningowych i testowych...")
@@ -54,6 +56,7 @@ def createTFIDFVectorRepresentations(trainFolder, testFolder, trainOutput, testO
     saveInChunks(testTfidfMatrix, testOutput, chunkSize)
 
 
+@measureExecutionTime
 def createBagOfWordsVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, chunkSize=1000, maxNumberOfFiles=None):
     # Wczytaj dokumenty z folderów treningowych i testowych
     print("🔄 Rozpoczynanie wczytywania dokumentów treningowych i testowych...")
@@ -70,6 +73,7 @@ def createBagOfWordsVectorRepresentations(trainFolder, testFolder, trainOutput, 
     saveInChunks(testCountMatrix, testOutput, chunkSize)
 
 
+@measureExecutionTime
 def createWord2VecVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, vectorSize=300, window=10, minCount=3, workers=4, maxNumberOfFiles=None, epochs=30):
     # Wczytaj dokumenty z folderów treningowych i testowych
     print("🔄 Rozpoczynanie wczytywania dokumentów treningowych i testowych do Word2Vec...")
