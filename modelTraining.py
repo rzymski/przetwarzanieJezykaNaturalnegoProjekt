@@ -1,27 +1,10 @@
 import os
 import pandas as pd
-from sklearn.svm import LinearSVC
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import numpy as np
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_auc_score
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-
-# def loadLabelsFromFolders(folder, maxNumberOfFiles=None):
-#     labels = []
-#     for subFolder in ['neg', 'pos']:
-#         folderPath = os.path.join(folder, subFolder)
-#         for index, fileName in enumerate(os.listdir(folderPath), 1):
-#             if fileName.endswith('.txt'):
-#                 labels.append(0 if subFolder == 'neg' else 1)
-#             if maxNumberOfFiles and index >= maxNumberOfFiles:
-#                 print(f"✔️ Załadowano {maxNumberOfFiles=} labeli.")
-#                 break
-#     print(f"✔️ Wczytano wszystkie etykiety (łącznie: {len(labels)}).")
-#     return labels
 
 def loadLabelsFromFolders(folder, maxNumberOfFiles=None):
     labels = []
@@ -39,11 +22,14 @@ def loadLabelsFromFolders(folder, maxNumberOfFiles=None):
 def trainModel(folderWithFiles, matrixData, modelTrainFunction, maxNumberOfFiles=None, **modelParams):
     # Load labels and data
     trainLabels = loadLabelsFromFolders(folderWithFiles, maxNumberOfFiles)
-    trainTfidfDF = pd.read_csv(matrixData, header=None)
+    if isinstance(matrixData, pd.DataFrame) or isinstance(matrixData, np.ndarray):
+        train = matrixData
+    else:
+        train = pd.read_csv(matrixData, header=None).values
     # Initialize the model with the given parameters
     classifier = modelTrainFunction(**modelParams)
     # Train the model
-    classifier.fit(trainTfidfDF, trainLabels)
+    classifier.fit(train, trainLabels)
     print(f"✅ Model {modelTrainFunction.__name__} trained successfully with parameters: {modelParams}")
     return classifier
 
@@ -51,11 +37,24 @@ def trainModel(folderWithFiles, matrixData, modelTrainFunction, maxNumberOfFiles
 def evaluateModel(classifier, folderWithFiles, dataMatrix, title="", maxNumberOfFiles=None, drawPlots=False):
     # Wczytanie etykiet i danych testowych
     labels = loadLabelsFromFolders(folderWithFiles, maxNumberOfFiles)
-    tfidfDF = pd.read_csv(dataMatrix, header=None)
+    if isinstance(dataMatrix, pd.DataFrame) or isinstance(dataMatrix, np.ndarray):
+        tfidfDF = dataMatrix
+    else:
+        tfidfDF = pd.read_csv(dataMatrix, header=None).values
     # Przewidywanie i ocena wyników
     predictedLabels = classifier.predict(tfidfDF)
     accuracy = accuracy_score(labels, predictedLabels)
     print(f"Accuracy: {accuracy:.2f}")
+    # Obliczanie AUC-ROC
+    if hasattr(classifier, "predict_proba"):  # Jeśli model obsługuje predict_proba
+        predictedProba = classifier.predict_proba(tfidfDF)[:, 1]
+        auc = roc_auc_score(labels, predictedProba)
+    elif hasattr(classifier, "decision_function"):  # Jeśli model obsługuje decision_function (np. SVC)
+        predictedProba = classifier.decision_function(tfidfDF)
+        auc = roc_auc_score(labels, predictedProba)
+    else:
+        auc = None  # AUC-ROC nie może być obliczone dla tego modelu
+    print(f"AUC-ROC: {auc:.2f}" if auc is not None else "AUC-ROC: Not available")
     # Raport klasyfikacji
     report = classification_report(labels, predictedLabels, target_names=['Negative', 'Positive'])
     print("\nClassification Report:")
@@ -69,30 +68,4 @@ def evaluateModel(classifier, folderWithFiles, dataMatrix, title="", maxNumberOf
         plt.ylabel("True Label")
         plt.title(f"Confusion Matrix of {title}")
         plt.show()
-    return accuracy
-
-
-if __name__ == "__main__":
-    # Ścieżki do folderów i plików wyjściowych
-    trainFolderPath = 'dataProcessed/train'
-    testFolderPath = 'dataProcessed/test'
-    trainMatrixFile = 'trainingMatrix.csv'
-    testMatrixFile = 'testMatrix.csv'
-
-    # Lista modeli do przetestowania
-    models = [
-        (LinearSVC, "LinearSVC", {}),
-        (RandomForestClassifier, "Random Forest", {"n_estimators": 100, "random_state": 42}),
-        (MultinomialNB, "Naive Bayes", {}),
-        (LogisticRegression, "Logistic Regression", {"max_iter": 1000, "random_state": 42})
-    ]
-
-    maxNFiles = 1000
-    # Trening i ocena dla każdego modelu
-    for trainModelFunction, modelName, trainModelParams in models:
-        print(f"\n{'=' * 10} Training and Evaluating {modelName} {'=' * 10}")
-        movieClassifier = trainModel(trainFolderPath, trainMatrixFile, trainModelFunction, **trainModelParams, maxNumberOfFiles=maxNFiles)
-        print(f"\nEvaluation on Training Set ({modelName}):")
-        evaluateModel(movieClassifier, trainFolderPath, trainMatrixFile, f"training {modelName}", maxNumberOfFiles=maxNFiles)
-        print(f"\nEvaluation on Test Set ({modelName}):")
-        evaluateModel(movieClassifier, testFolderPath, testMatrixFile, f"test {modelName}", maxNumberOfFiles=maxNFiles)
+    return accuracy, auc

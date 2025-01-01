@@ -45,7 +45,7 @@ def createTFIDFVectorRepresentations(trainFolder, testFolder, trainOutput, testO
     testDocuments = loadFilesFromFolder(testFolder, maxNumberOfFiles)
     # Oblicz macierz TF-IDF
     print("🔧 Rozpoczynanie obliczania macierzy TF-IDF...")
-    vectorizer = TfidfVectorizer(token_pattern=r"(?u)\b\w\w+\b")    
+    vectorizer = TfidfVectorizer(ngram_range=(1, 3), max_features=10000, min_df=5, max_df=0.9, sublinear_tf=True, binary=True)
     trainTfidfMatrix = vectorizer.fit_transform(trainDocuments)
     testTfidfMatrix = vectorizer.transform(testDocuments)
     print("✅ Obliczono macierz TF-IDF.")
@@ -61,7 +61,7 @@ def createBagOfWordsVectorRepresentations(trainFolder, testFolder, trainOutput, 
     testDocuments = loadFilesFromFolder(testFolder, maxNumberOfFiles)
     # Oblicz macierz Count Vectorizer
     print("🔧 Rozpoczynanie obliczania macierzy Count Vectorizer...")
-    vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w\w+\b")
+    vectorizer = CountVectorizer()
     trainCountMatrix = vectorizer.fit_transform(trainDocuments)
     testCountMatrix = vectorizer.transform(testDocuments)
     print("✔️ Obliczono macierz Count Vectorizer.")
@@ -70,21 +70,27 @@ def createBagOfWordsVectorRepresentations(trainFolder, testFolder, trainOutput, 
     saveInChunks(testCountMatrix, testOutput, chunkSize)
 
 
-def createWord2VecVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, vectorSize=100, window=5, minCount=1, workers=4, maxNumberOfFiles=None):
+def createWord2VecVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, vectorSize=300, window=10, minCount=3, workers=4, maxNumberOfFiles=None, epochs=30):
     # Wczytaj dokumenty z folderów treningowych i testowych
     print("🔄 Rozpoczynanie wczytywania dokumentów treningowych i testowych do Word2Vec...")
     trainDocuments = loadFilesFromFolder(trainFolder, maxNumberOfFiles)
     testDocuments = loadFilesFromFolder(testFolder, maxNumberOfFiles)
+
     # Tokenizacja dokumentów do listy list tokenów
     print("🔧 Tokenizacja dokumentów...")
-    tokenizedDocuments = [simple_preprocess(doc) for doc in trainDocuments + testDocuments]
-    # Trening modelu Word2Vec
+    tokenizedTrain = [simple_preprocess(doc) for doc in trainDocuments]
+    tokenizedTest = [simple_preprocess(doc) for doc in testDocuments]
+
+    # Trening modelu Word2Vec na zbiorze treningowym
     print("📚 Trening modelu Word2Vec...")
-    word2vecModel = Word2Vec(sentences=tokenizedDocuments, vector_size=vectorSize, window=window, min_count=minCount, workers=workers)
+    word2vecModel = Word2Vec(sentences=tokenizedTrain, vector_size=vectorSize, window=window, min_count=minCount, workers=workers)
+
+    # Dodatkowe iteracje treningu
+    print("🔄 Dodatkowe iteracje treningu Word2Vec...")
+    word2vecModel.train(tokenizedTrain, total_examples=len(tokenizedTrain), epochs=epochs)
 
     # Funkcja do konwersji dokumentów na wektory
-    def documentToVector(doc, model):
-        tokens = simple_preprocess(doc)
+    def documentToVector(tokens, model):
         vectors = [model.wv[token] for token in tokens if token in model.wv]
         if vectors:
             return np.mean(vectors, axis=0)
@@ -93,20 +99,11 @@ def createWord2VecVectorRepresentations(trainFolder, testFolder, trainOutput, te
 
     # Konwersja dokumentów na macierze wektorów
     print("🔄 Konwersja dokumentów na macierze wektorów Word2Vec...")
-    trainVectors = [documentToVector(doc, word2vecModel) for doc in trainDocuments]
-    testVectors = [documentToVector(doc, word2vecModel) for doc in testDocuments]
+    trainVectors = [documentToVector(doc, word2vecModel) for doc in tokenizedTrain]
+    testVectors = [documentToVector(doc, word2vecModel) for doc in tokenizedTest]
+
     # Zapis wektorów do plików CSV
     print("💾 Zapis wektorów Word2Vec do plików CSV...")
     pd.DataFrame(trainVectors).to_csv(trainOutput, index=False, header=False)
     pd.DataFrame(testVectors).to_csv(testOutput, index=False, header=False)
     print("✔️ Zakończono zapis wektorów Word2Vec.")
-
-
-if __name__ == "__main__":
-    trainFolderPath = 'dataProcessed/train'
-    testFolderPath = 'dataProcessed/test'
-    trainMatrixFile = 'trainingMatrix.csv'
-    testMatrixFile = 'testMatrix.csv'
-    print("🚀 Rozpoczynanie procesu tworzenia reprezentacji wektorowych...")
-    createTFIDFVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=1000)
-    print("✔️ Proces tworzenia reprezentacji wektorowych zakończony.")
