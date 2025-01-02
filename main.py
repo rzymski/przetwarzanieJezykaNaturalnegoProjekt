@@ -7,8 +7,10 @@ from modelTraining import trainModel, evaluateModel
 import pandas as pd
 from itertools import product
 from sklearn.decomposition import TruncatedSVD
+from utils import measureExecutionTime
 
 
+@measureExecutionTime
 def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=False):
     inputDir = 'data'
     outputDir = 'dataProcessed'
@@ -52,7 +54,7 @@ def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=Fals
             {"tol": [1e-3, 1e-4]},
         ]),
         (RandomForestClassifier, "Random Forest", [
-            {"n_estimators": [500, 1000, 1500]},
+            {"n_estimators": [100, 500, 1000]},
             {"max_depth": [5, 10, None]},
             {"min_samples_split": [2, 5, 10]}
         ]),
@@ -114,9 +116,9 @@ def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=Fals
 
 
 if __name__ == "__main__":
-    main(maxNumberOfFiles=5000, createVector="TFIDF")
-    main(maxNumberOfFiles=5000, createVector="BagOfWords")
-    main(maxNumberOfFiles=5000, createVector="Word2Vec")
+    main(maxNumberOfFiles=2500, createVector="TFIDF")
+    main(maxNumberOfFiles=2500, createVector="BagOfWords")
+    main(maxNumberOfFiles=1000, createVector="Word2Vec")
 
     # main(lemmatize=True, createVector="TFIDF", maxNumberOfFiles=None)
     # main()

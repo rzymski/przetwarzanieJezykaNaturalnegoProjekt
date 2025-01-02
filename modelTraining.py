@@ -25,13 +25,13 @@ def trainModel(folderWithFiles, matrixData, modelTrainFunction, maxNumberOfFiles
     # Load labels and data
     trainLabels = loadLabelsFromFolders(folderWithFiles, maxNumberOfFiles)
     if isinstance(matrixData, pd.DataFrame) or isinstance(matrixData, np.ndarray):
-        train = matrixData
+        trainData = matrixData
     else:
-        train = pd.read_csv(matrixData, header=None).values
+        trainData = pd.read_csv(matrixData, header=None).values
     # Initialize the model with the given parameters
     classifier = modelTrainFunction(**modelParams)
     # Train the model
-    classifier.fit(train, trainLabels)
+    classifier.fit(trainData, trainLabels)
     print(f"✅ Model {modelTrainFunction.__name__} trained successfully with parameters: {modelParams}")
     return classifier
 
@@ -41,19 +41,19 @@ def evaluateModel(classifier, folderWithFiles, dataMatrix, title="", maxNumberOf
     # Wczytanie etykiet i danych testowych
     labels = loadLabelsFromFolders(folderWithFiles, maxNumberOfFiles)
     if isinstance(dataMatrix, pd.DataFrame) or isinstance(dataMatrix, np.ndarray):
-        tfidfDF = dataMatrix
+        evaluateData = dataMatrix
     else:
-        tfidfDF = pd.read_csv(dataMatrix, header=None).values
+        evaluateData = pd.read_csv(dataMatrix, header=None).values
     # Przewidywanie i ocena wyników
-    predictedLabels = classifier.predict(tfidfDF)
+    predictedLabels = classifier.predict(evaluateData)
     accuracy = accuracy_score(labels, predictedLabels)
     print(f"Accuracy: {accuracy:.2f}")
     # Obliczanie AUC-ROC
     if hasattr(classifier, "predict_proba"):  # Jeśli model obsługuje predict_proba
-        predictedProba = classifier.predict_proba(tfidfDF)[:, 1]
+        predictedProba = classifier.predict_proba(evaluateData)[:, 1]
         auc = roc_auc_score(labels, predictedProba)
     elif hasattr(classifier, "decision_function"):  # Jeśli model obsługuje decision_function (np. SVC)
-        predictedProba = classifier.decision_function(tfidfDF)
+        predictedProba = classifier.decision_function(evaluateData)
         auc = roc_auc_score(labels, predictedProba)
     else:
         auc = None  # AUC-ROC nie może być obliczone dla tego modelu

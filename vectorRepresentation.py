@@ -74,7 +74,7 @@ def createBagOfWordsVectorRepresentations(trainFolder, testFolder, trainOutput, 
 
 
 @measureExecutionTime
-def createWord2VecVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, vectorSize=300, window=10, minCount=3, workers=4, maxNumberOfFiles=None, epochs=30):
+def createWord2VecVectorRepresentations(trainFolder, testFolder, trainOutput, testOutput, vectorSize=300, window=10, minCount=3, workers=4, maxNumberOfFiles=None, epochs=50):
     # Wczytaj dokumenty z folderów treningowych i testowych
     print("🔄 Rozpoczynanie wczytywania dokumentów treningowych i testowych do Word2Vec...")
     trainDocuments = loadFilesFromFolder(trainFolder, maxNumberOfFiles)
