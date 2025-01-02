@@ -11,7 +11,7 @@ from utils import measureExecutionTime
 
 
 @measureExecutionTime
-def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=False):
+def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=False, models=None):
     inputDir = 'data'
     outputDir = 'dataProcessed'
     if lemmatize:
@@ -45,26 +45,27 @@ def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=Fals
         trainDataReduced = trainData
         testDataReduced = testData
 
-    # Lista modeli z parametrami
-    models = [
-        (LinearSVC, "LinearSVC", [
-            {"C": [0.15, 0.2, 0.25, 0.5, 1.0, 2.0]},
-            {"max_iter": [1000, 100, 10000]},
-            {"loss": ["hinge", "squared_hinge"]},
-            {"tol": [1e-3, 1e-4]},
-        ]),
-        (RandomForestClassifier, "Random Forest", [
-            {"n_estimators": [100, 500, 1000]},
-            {"max_depth": [5, 10, None]},
-            {"min_samples_split": [2, 5, 10]}
-        ]),
-        (LogisticRegression, "Logistic Regression", [
-            {"C": [0.5, 1.0, 1.2, 1.5, 2.0]},
-            {"solver": ["liblinear", "lbfgs", "saga"]},
-            {"max_iter": [1000, 100, 10000]},
-            {"tol": [1e-3, 1e-4]},
-        ])
-    ]
+    if not models:
+        # Lista modeli z parametrami
+        models = [
+            (LinearSVC, "LinearSVC", [
+                {"C": [0.15, 0.2, 0.25, 0.5, 1.0, 2.0]},
+                {"max_iter": [100, 1000, 10000]},
+                {"loss": ["hinge", "squared_hinge"]},
+                {"tol": [1e-3, 1e-4]},
+            ]),
+            (RandomForestClassifier, "Random Forest", [
+                {"n_estimators": [500, 1000, 1500]},
+                {"max_depth": [5, 10, None]},
+                {"min_samples_split": [2, 5, 10]}
+            ]),
+            (LogisticRegression, "Logistic Regression", [
+                {"C": [0.5, 1.0, 1.2, 1.5, 2.0]},
+                {"solver": ["liblinear", "lbfgs", "saga"]},
+                {"max_iter": [100, 1000, 10000]},
+                {"tol": [1e-3, 1e-4]},
+            ])
+        ]
 
     results = []
 
@@ -116,9 +117,21 @@ def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=Fals
 
 
 if __name__ == "__main__":
-    main(maxNumberOfFiles=2500, createVector="TFIDF")
-    main(maxNumberOfFiles=2500, createVector="BagOfWords")
-    main(maxNumberOfFiles=1000, createVector="Word2Vec")
+    tfidfBestModels = [
+        (LogisticRegression, "Logistic Regression", [{"C": [1.5, 2.0]}, {"solver": ["lbfgs"]}, {"max_iter": [1000]}, {"tol": [1e-3]}])
+    ]
+    main(createVector="TFIDF", models=tfidfBestModels)
+    bagOfWordsBestModels = [
+        (LogisticRegression, "Logistic Regression", [{"C": [1.5]}, {"solver": ["saga"]}, {"max_iter": [100]}, {"tol": [1e-3]}]),
+        (RandomForestClassifier, "Random Forest", [{"n_estimators": [1000]}, {"max_depth": [None]}, {"min_samples_split": [5]}])
+    ]
+    main(createVector="BagOfWords", models=bagOfWordsBestModels)
+    world2VecBestModels = [(LogisticRegression, "Logistic Regression", [{"C": [0.5]}, {"solver": ["liblinear"]}, {"max_iter": [1000]}, {"tol": [1e-3]}])]
+    main(createVector="Word2Vec", models=world2VecBestModels)
+
+    # main(maxNumberOfFiles=2500, createVector="TFIDF")
+    # main(maxNumberOfFiles=2500, createVector="BagOfWords")
+    # main(maxNumberOfFiles=2500, createVector="Word2Vec")
 
     # main(lemmatize=True, createVector="TFIDF", maxNumberOfFiles=None)
     # main()
