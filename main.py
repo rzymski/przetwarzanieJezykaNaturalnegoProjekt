@@ -7,11 +7,11 @@ from modelTraining import trainModel, evaluateModel
 import pandas as pd
 from itertools import product
 from sklearn.decomposition import TruncatedSVD
-from utils import measureExecutionTime
+from utils import measureExecutionTime, saveToPkl
 
 
 @measureExecutionTime
-def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=False, models=None):
+def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=False, models=None, save=False):
     inputDir = 'data'
     outputDir = 'dataProcessed'
     if lemmatize:
@@ -22,16 +22,26 @@ def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=Fals
     testFolderPath = f'{outputDir}/test'
     trainMatrixFile = f"trainingMatrix{createVector}{maxNumberOfFiles if maxNumberOfFiles else ''}.csv"
     testMatrixFile = f"testMatrix{createVector}{maxNumberOfFiles if maxNumberOfFiles else ''}.csv"
+    vectorizerFilePath = f"vectors/{createVector}{maxNumberOfFiles if maxNumberOfFiles else ''}.pkl"
+
+    # Wybór metody wektoryzacji
+    vectorizer = None
     if createVector == "TFIDF":
-        createTFIDFVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=maxNumberOfFiles)
+        vectorizer = createTFIDFVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=maxNumberOfFiles)
     elif createVector == "BagOfWords":
-        createBagOfWordsVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=maxNumberOfFiles)
+        vectorizer = createBagOfWordsVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=maxNumberOfFiles)
     elif createVector == "Word2Vec":
-        createWord2VecVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=maxNumberOfFiles)
+        vectorizer = createWord2VecVectorRepresentations(trainFolderPath, testFolderPath, trainMatrixFile, testMatrixFile, maxNumberOfFiles=maxNumberOfFiles)
+
+    # Zapis wektoryzera do pliku
+    if vectorizer and save:
+        saveToPkl(vectorizer, vectorizerFilePath)
 
     # # Wczytaj dane
     trainData = pd.read_csv(trainMatrixFile, header=None).values
+    print("📖 Wczytano dane treningowe")
     testData = pd.read_csv(testMatrixFile, header=None).values
+    print("📖 Wczytano dane testowe")
 
     # Redukcja wymiarowości za pomocą PCA
     if createVector != "Word2Vec":
@@ -39,6 +49,7 @@ def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=Fals
         pca = TruncatedSVD(n_components=2500)  # Zredukuj do 2500 wymiarów
         trainDataReduced = pca.fit_transform(trainData)
         testDataReduced = pca.transform(testData)
+        saveToPkl(pca, f"vectors/{createVector}_PCA.pkl")  # Zapisanie PCA
         print(f"✅ Zredukowano wymiarowość do {pca.n_components} komponentów.")
     else:
         print("⚠️ Pomijanie redukcji wymiarowości dla Word2Vec...")
@@ -83,10 +94,12 @@ def main(lemmatize=False, createVector="", maxNumberOfFiles=None, drawPlots=Fals
         paramNames = list(allParams.keys())
         paramValues = list(allParams.values())
 
-        for paramCombination in product(*paramValues):
+        for index, paramCombination in enumerate(product(*paramValues)):
             params = dict(zip(paramNames, paramCombination))
             print(f"\n{'=' * 10} Training and Evaluating {createVector} {modelName} with params {params} {'=' * 10}")
             movieClassifier = trainModel(trainFolderPath, currentTrainData, trainModelFunction, **params, maxNumberOfFiles=maxNumberOfFiles)
+            if save:
+                saveToPkl(movieClassifier, f"models/{createVector}_{modelName.replace(' ', '')}{maxNumberOfFiles if maxNumberOfFiles else ''}_{index}.pkl")
             print(f"\nEvaluation on Training Set ({createVector} - {modelName}):")
             trainAccuracy, trainAUC = evaluateModel(movieClassifier, trainFolderPath, currentTrainData, f"training {modelName} {params}", maxNumberOfFiles=maxNumberOfFiles, drawPlots=drawPlots)
             print(f"\nEvaluation on Test Set ({createVector} - {modelName}):")
@@ -120,18 +133,18 @@ if __name__ == "__main__":
     tfidfBestModels = [
         (LogisticRegression, "Logistic Regression", [{"C": [1.5, 2.0]}, {"solver": ["lbfgs"]}, {"max_iter": [1000]}, {"tol": [1e-3]}])
     ]
-    main(createVector="TFIDF", models=tfidfBestModels)
+    main(createVector="TFIDF", models=tfidfBestModels, save=True)
     bagOfWordsBestModels = [
         (LogisticRegression, "Logistic Regression", [{"C": [1.5]}, {"solver": ["saga"]}, {"max_iter": [100]}, {"tol": [1e-3]}]),
         (RandomForestClassifier, "Random Forest", [{"n_estimators": [1000]}, {"max_depth": [None]}, {"min_samples_split": [5]}])
     ]
-    main(createVector="BagOfWords", models=bagOfWordsBestModels)
+    main(createVector="BagOfWords", models=bagOfWordsBestModels, save=True)
     world2VecBestModels = [(LogisticRegression, "Logistic Regression", [{"C": [0.5]}, {"solver": ["liblinear"]}, {"max_iter": [1000]}, {"tol": [1e-3]}])]
-    main(createVector="Word2Vec", models=world2VecBestModels)
+    main(createVector="Word2Vec", models=world2VecBestModels, save=True)
 
-    # main(maxNumberOfFiles=2500, createVector="TFIDF")
-    # main(maxNumberOfFiles=2500, createVector="BagOfWords")
-    # main(maxNumberOfFiles=2500, createVector="Word2Vec")
+    # main(maxNumberOfFiles=5000, createVector="TFIDF")
+    # main(maxNumberOfFiles=5000, createVector="BagOfWords")
+    # main(maxNumberOfFiles=5000, createVector="Word2Vec")
 
     # main(lemmatize=True, createVector="TFIDF", maxNumberOfFiles=None)
     # main()

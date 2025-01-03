@@ -1,4 +1,6 @@
 import time
+import os
+import pickle
 
 
 def measureExecutionTime(func):
@@ -10,3 +12,26 @@ def measureExecutionTime(func):
         print(f"⏱️ Funkcja '{func.__name__}' wykonana w {executionTime:.4f} sekund.")
         return result
     return wrapper
+
+
+def saveToPkl(obj, filePath):
+    try:
+        os.makedirs(os.path.dirname(filePath), exist_ok=True)
+        with open(filePath, 'wb') as file:
+            pickle.dump(obj, file)
+        print(f"✅ Obiekt zapisany w pliku: {filePath}")
+    except Exception as e:
+        print(f"❌ Błąd podczas zapisywania do pliku {filePath}: {e}")
+
+
+def loadFromPkl(filePath):
+    try:
+        with open(filePath, 'rb') as file:
+            obj = pickle.load(file)
+        print(f"✅ Obiekt wczytany z pliku: {filePath}")
+        return obj
+    except FileNotFoundError:
+        print(f"❌ Błąd: Plik {filePath} nie istnieje.")
+    except Exception as e:
+        print(f"❌ Błąd podczas wczytywania pliku {filePath}: {e}")
+    return None

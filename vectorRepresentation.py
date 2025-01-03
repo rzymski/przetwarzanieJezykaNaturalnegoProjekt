@@ -54,6 +54,7 @@ def createTFIDFVectorRepresentations(trainFolder, testFolder, trainOutput, testO
     # Zapisuj macierze TF-IDF partiami do plików CSV
     saveInChunks(trainTfidfMatrix, trainOutput, chunkSize)
     saveInChunks(testTfidfMatrix, testOutput, chunkSize)
+    return vectorizer
 
 
 @measureExecutionTime
@@ -71,6 +72,7 @@ def createBagOfWordsVectorRepresentations(trainFolder, testFolder, trainOutput, 
     # Zapisuj macierze Count Vectorizer partiami do plików CSV
     saveInChunks(trainCountMatrix, trainOutput, chunkSize)
     saveInChunks(testCountMatrix, testOutput, chunkSize)
+    return vectorizer
 
 
 @measureExecutionTime
@@ -79,20 +81,16 @@ def createWord2VecVectorRepresentations(trainFolder, testFolder, trainOutput, te
     print("🔄 Rozpoczynanie wczytywania dokumentów treningowych i testowych do Word2Vec...")
     trainDocuments = loadFilesFromFolder(trainFolder, maxNumberOfFiles)
     testDocuments = loadFilesFromFolder(testFolder, maxNumberOfFiles)
-
     # Tokenizacja dokumentów do listy list tokenów
     print("🔧 Tokenizacja dokumentów...")
     tokenizedTrain = [simple_preprocess(doc) for doc in trainDocuments]
     tokenizedTest = [simple_preprocess(doc) for doc in testDocuments]
-
     # Trening modelu Word2Vec na zbiorze treningowym
     print("📚 Trening modelu Word2Vec...")
     word2vecModel = Word2Vec(sentences=tokenizedTrain, vector_size=vectorSize, window=window, min_count=minCount, workers=workers)
-
     # Dodatkowe iteracje treningu
     print("🔄 Dodatkowe iteracje treningu Word2Vec...")
     word2vecModel.train(tokenizedTrain, total_examples=len(tokenizedTrain), epochs=epochs)
-
     # Funkcja do konwersji dokumentów na wektory
     def documentToVector(tokens, model):
         vectors = [model.wv[token] for token in tokens if token in model.wv]
@@ -100,14 +98,13 @@ def createWord2VecVectorRepresentations(trainFolder, testFolder, trainOutput, te
             return np.mean(vectors, axis=0)
         else:
             return np.zeros(vectorSize)
-
     # Konwersja dokumentów na macierze wektorów
     print("🔄 Konwersja dokumentów na macierze wektorów Word2Vec...")
     trainVectors = [documentToVector(doc, word2vecModel) for doc in tokenizedTrain]
     testVectors = [documentToVector(doc, word2vecModel) for doc in tokenizedTest]
-
     # Zapis wektorów do plików CSV
     print("💾 Zapis wektorów Word2Vec do plików CSV...")
     pd.DataFrame(trainVectors).to_csv(trainOutput, index=False, header=False)
     pd.DataFrame(testVectors).to_csv(testOutput, index=False, header=False)
     print("✔️ Zakończono zapis wektorów Word2Vec.")
+    return word2vecModel
