@@ -59,7 +59,7 @@ def evaluateModel(classifier, folderWithFiles, dataMatrix, title="", maxNumberOf
         auc = None  # AUC-ROC nie może być obliczone dla tego modelu
     print(f"AUC-ROC: {auc:.2f}" if auc is not None else "AUC-ROC: Not available")
     # Raport klasyfikacji
-    report = classification_report(labels, predictedLabels, target_names=['Negative', 'Positive'])
+    # report = classification_report(labels, predictedLabels, target_names=['Negative', 'Positive'])
     # print("\nClassification Report:")
     # print(report)
     # Macierz pomyłek (wykres)

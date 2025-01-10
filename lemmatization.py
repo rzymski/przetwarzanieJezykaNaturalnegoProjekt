@@ -5,6 +5,7 @@ nlp = spacy.load('en_core_web_sm')
 
 
 def processText(text):  # Funkcja do lematyzacji tekstu
+    text = text.lower()
     doc = nlp(text)
     processedWords = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
     # print("✅ Lematyzacja zakończona.")

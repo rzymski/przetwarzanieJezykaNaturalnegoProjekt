@@ -42,6 +42,11 @@ def classifySentiment(inputTextOrPath, modelFilePath, vectorizerFilePath, pcaFil
 
 
 if __name__ == "__main__":
+    world2VecResult = classifySentiment("reviewTestP.txt", "models/Word2Vec_LogisticRegression.pkl", "vectors/Word2Vec.pkl")
+    print(f"Recenzja jest: {'pozytywna' if world2VecResult else 'negatywna'}")
+    world2VecResult = classifySentiment("reviewTestN.txt", "models/Word2Vec_LogisticRegression.pkl", "vectors/Word2Vec.pkl")
+    print(f"Recenzja jest: {'pozytywna' if world2VecResult else 'negatywna'}")
+
     tfidfResult = classifySentiment("reviewTestP.txt", "models/TFIDF_LogisticRegression.pkl", "vectors/TFIDF.pkl", "vectors/TFIDF_PCA.pkl")
     print(f"Recenzja jest: {'pozytywna' if tfidfResult else 'negatywna'}")
     tfidfResult = classifySentiment("reviewTestN.txt", "models/TFIDF_LogisticRegression.pkl", "vectors/TFIDF.pkl", "vectors/TFIDF_PCA.pkl")
@@ -60,7 +65,6 @@ if __name__ == "__main__":
     bagOfWordsResult = classifySentiment("reviewTestN.txt", "models/BagOfWords_RandomForest.pkl", "vectors/BagOfWords.pkl")
     print(f"Recenzja jest: {'pozytywna' if bagOfWordsResult else 'negatywna'}")
 
-    world2VecResult = classifySentiment("reviewTestP.txt", "models/Word2Vec_LogisticRegression.pkl", "vectors/Word2Vec.pkl")
-    print(f"Recenzja jest: {'pozytywna' if world2VecResult else 'negatywna'}")
-    world2VecResult = classifySentiment("reviewTestN.txt", "models/Word2Vec_LogisticRegression.pkl", "vectors/Word2Vec.pkl")
-    print(f"Recenzja jest: {'pozytywna' if world2VecResult else 'negatywna'}")
+    myOwnText = "The terrible portrayal of Bruce Wayne was enough to ruin the movie, but beyond that it’s a boring movie"
+    tfidfResult = classifySentiment(myOwnText, "models/TFIDF_LogisticRegression.pkl", "vectors/TFIDF.pkl", "vectors/TFIDF_PCA.pkl", isFile=False)
+    print(f"Recenzja jest: {'pozytywna' if tfidfResult else 'negatywna'}")
