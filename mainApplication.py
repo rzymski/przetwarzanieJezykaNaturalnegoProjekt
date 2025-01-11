@@ -1,28 +1,30 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
+import configparser
+from utils import loadFromPkl
+from classifier import classifySentiment
 
 
 class Classifier:
-    def __init__(self, root):
+    def __init__(self, root, configFile):
         self.root = root
         self.root.title("Text Classifier")
         boldFont18 = ("Arial", 18, "bold")
-        # Model Selection Section
+        # Load all models, vectors, and PCA files at startup
+        self.models = self.loadAllModels(configFile)
+        firstModelKey = next(iter(self.models))
+        self.currentModel = self.models[firstModelKey]
+        # Model Selection Section (Dropdown)
         self.modelFrame = tk.Frame(self.root)
         self.modelFrame.pack(pady=20)
-        self.chosenModel = tk.IntVar()
-        self.chosenModel.set(1)
-        # "TFIDF Logistic Regression {'C': 1.5, 'solver': 'lbfgs', 'max_iter': 1000, 'tol': 0.001}"
-        self.firstModelLabel = tk.Label(self.modelFrame, text="Model 1", font=boldFont18)
-        self.firstModelLabel.grid(row=0, column=0, padx=10, pady=5, sticky="w")
-        self.firstModelRadioButton = tk.Radiobutton(self.modelFrame, variable=self.chosenModel, value=1)
-        self.firstModelRadioButton.grid(row=0, column=1, padx=10, pady=5)
-        # "BagOfWords Random Forest {'n_estimators': 1000, 'max_depth': None, 'min_samples_split': 5}"
-        self.secondModelLabel = tk.Label(self.modelFrame, text="Model 2", font=boldFont18)
-        self.secondModelLabel.grid(row=1, column=0, padx=10, pady=5, sticky="w")
-        self.secondModelRadioButton = tk.Radiobutton(self.modelFrame, variable=self.chosenModel, value=2)
-        self.secondModelRadioButton.grid(row=1, column=1, padx=10, pady=5)
-
+        self.modelLabel = tk.Label(self.modelFrame, text="Select Model:", font=boldFont18)
+        self.modelLabel.pack(side=tk.LEFT, padx=10)
+        # Using tk.OptionMenu
+        self.selectedModelDropdown = tk.StringVar()
+        self.selectedModelDropdown.set(firstModelKey)
+        self.modelDropdown = tk.OptionMenu(self.modelFrame, self.selectedModelDropdown, *self.models.keys(), command=self.onModelSelect)
+        self.modelDropdown.config(font=boldFont18, width=40)
+        self.modelDropdown.pack(side=tk.LEFT, padx=10)
         # File Input Section
         self.fileFrame = tk.Frame(self.root)
         self.fileFrame.pack(pady=20)
@@ -37,23 +39,57 @@ class Classifier:
         self.textLabel.pack(anchor="w")
         self.textInput = tk.Text(self.textFrame, height=20, width=100, font=("Ariel", 16))
         self.textInput.pack(pady=10)
-
+        # Classify button
         self.classifyButton = tk.Button(self.root, text="Classify Text", command=self.classifyInputText, font=boldFont18)
         self.classifyButton.pack(pady=20)
+
+    @staticmethod
+    def loadAllModels(configFile):
+        config = configparser.ConfigParser()
+        config.read(configFile)
+        models = {}
+        for section in config.sections():
+            try:
+                modelData = {
+                    "model": loadFromPkl(config[section].get("model", "")),
+                    "vector": loadFromPkl(config[section].get("vector", "")),
+                    "pca": loadFromPkl(config[section].get("pca", "")) if config[section].get("pca") else None,
+                }
+                models[section] = modelData
+                print(f"✅ Loaded all resources for {section}.")
+            except Exception as e:
+                print(f"❌ Error loading resources for {section}: {e}")
+        return models
+
+    def onModelSelect(self, modelName):
+        if modelName in self.models:
+            self.currentModel = self.models[modelName]
+            print(f"Selected Model: {modelName}")
+            print(f" - Model Object: {self.currentModel['model']}")
+            print(f" - Vector Object: {self.currentModel['vector']}")
+            print(f" - PCA Object: {self.currentModel['pca']}")
 
     def browseFile(self):
         filePath = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
         if filePath:
-            print(f"File selected: {filePath}")
-            # Placeholder for actual logic
-            messagebox.showinfo("File Selected", f"Selected file: {filePath}")
+            if filePath.endswith(".txt"):
+                try:
+                    with open(filePath, 'r', encoding='utf-8') as file:
+                        content = file.read()
+                    self.textInput.delete("1.0", tk.END)  # Clear the text input
+                    self.textInput.insert(tk.END, content)  # Insert file content
+                    # messagebox.showinfo("File Loaded", f"Successfully loaded the content from: {filePath}")
+                except Exception as e:
+                    messagebox.showerror("Error", f"An error occurred while reading the file:\n{e}")
+            else:
+                messagebox.showerror("Invalid File", "The selected file is not a .txt file. Please choose a valid text file.")
 
     def classifyInputText(self):
         inputText = self.textInput.get("1.0", tk.END).strip()
         if inputText:
             print(f"Input text: {inputText}")
-            # Placeholder for actual logic
-            messagebox.showinfo("Classification Result", "Text classification logic placeholder.")
+            result = classifySentiment(inputText, self.currentModel['model'], self.currentModel['vector'], self.currentModel['pca'])
+            messagebox.showinfo("Classification Result", f"Text was classified as {'positive' if result else 'negative'}.")
         else:
             print("No text entered.")
             messagebox.showwarning("Input Required", "Please enter some text to classify.")
@@ -61,5 +97,5 @@ class Classifier:
 
 if __name__ == "__main__":
     rootInterface = tk.Tk()
-    app = Classifier(rootInterface)
+    app = Classifier(rootInterface, "classifier-config.ini")
     rootInterface.mainloop()
