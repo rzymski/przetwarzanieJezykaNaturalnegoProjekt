@@ -1,0 +1,2 @@
+There's need to exist folder where would be output results from mainForTraining.py, but it don't need to be specifically this folder.
+That's just default folder for output files.
