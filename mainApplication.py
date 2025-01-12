@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import configparser
@@ -7,6 +8,9 @@ from classifier import classifySentiment
 
 class Classifier:
     def __init__(self, root, configFile):
+        if not os.path.isfile(configFile):
+            print(f"❌ Configuration file '{configFile}' not found. Please ensure it exists.")
+            exit(1)
         self.root = root
         self.root.title("Text Classifier")
         boldFont18 = ("Arial", 18, "bold")
@@ -68,6 +72,10 @@ class Classifier:
                     "vector": loadFromPkl(config[section].get("vector", ""), debug=False),
                     "pca": loadFromPkl(config[section].get("pca", ""), debug=False) if config[section].get("pca") else None,
                 }
+                if modelData['model'] is None:
+                    raise Exception(f"Missing model for section '{section}'")
+                if modelData['vector'] is None:
+                    raise Exception(f"Missing vector for section '{section}'")
                 models[section] = modelData
                 print(f"✅ Loaded all resources for {section}.")
             except Exception as e:
