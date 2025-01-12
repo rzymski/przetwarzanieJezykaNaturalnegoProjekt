@@ -38,10 +38,22 @@ class Classifier:
         self.textLabel = tk.Label(self.textFrame, text="Classify by Text Input:", font=boldFont18)
         self.textLabel.pack(anchor="w")
         self.textInput = tk.Text(self.textFrame, height=20, width=100, font=("Ariel", 16))
-        self.textInput.pack(pady=10)
-        # Classify button
+        self.textInput.pack(pady=(10, 0))
+        # Classify button and result display
         self.classifyButton = tk.Button(self.root, text="Classify Text", command=self.classifyInputText, font=boldFont18)
-        self.classifyButton.pack(pady=20)
+        self.classifyButton.pack(side=tk.TOP, pady=(0, 20), anchor="center")  # Centered button
+        # Result display with padding from the right
+        self.resultLabel = tk.Label(self.root, text="", font=("Arial", 32, "bold"), anchor="e")
+        self.resultLabel.place(relx=1.0, x=-50, y=770, anchor="e")  # Right-aligned with 50 padding from right
+
+        self.root.update_idletasks()
+        windowWidth = self.root.winfo_width()
+        windowHeight = self.root.winfo_height()
+        screenWidth = self.root.winfo_screenwidth()
+        screenHeight = self.root.winfo_screenheight()
+        x = (screenWidth // 2) - (windowWidth // 2)
+        y = (screenHeight // 2) - (windowHeight // 2)
+        self.root.geometry(f"{windowWidth}x{windowHeight}+{x}+{y}")
 
     @staticmethod
     def loadAllModels(configFile):
@@ -51,9 +63,9 @@ class Classifier:
         for section in config.sections():
             try:
                 modelData = {
-                    "model": loadFromPkl(config[section].get("model", "")),
-                    "vector": loadFromPkl(config[section].get("vector", "")),
-                    "pca": loadFromPkl(config[section].get("pca", "")) if config[section].get("pca") else None,
+                    "model": loadFromPkl(config[section].get("model", ""), debug=False),
+                    "vector": loadFromPkl(config[section].get("vector", ""), debug=False),
+                    "pca": loadFromPkl(config[section].get("pca", ""), debug=False) if config[section].get("pca") else None,
                 }
                 models[section] = modelData
                 print(f"✅ Loaded all resources for {section}.")
@@ -89,9 +101,11 @@ class Classifier:
         if inputText:
             print(f"Input text: {inputText}")
             result = classifySentiment(inputText, self.currentModel['model'], self.currentModel['vector'], self.currentModel['pca'])
-            messagebox.showinfo("Classification Result", f"Text was classified as {'positive' if result else 'negative'}.")
+            self.resultLabel.config(text=f"{('POSITIVE' if result else 'NEGATIVE')} REVIEW", fg=('green' if result else 'red'))
+            # messagebox.showinfo("Classification Result", f"Text was classified as {'positive' if result else 'negative'}.")
         else:
             print("No text entered.")
+            self.resultLabel.config(text=f"")
             messagebox.showwarning("Input Required", "Please enter some text to classify.")
 
 

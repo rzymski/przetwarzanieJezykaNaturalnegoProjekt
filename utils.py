@@ -14,21 +14,23 @@ def measureExecutionTime(func):
     return wrapper
 
 
-def saveToPkl(obj, filePath):
+def saveToPkl(obj, filePath, debug=True):
     try:
         os.makedirs(os.path.dirname(filePath), exist_ok=True)
         with open(filePath, 'wb') as file:
             pickle.dump(obj, file)
-        print(f"✅ Obiekt zapisany w pliku: {filePath}")
+        if debug:
+            print(f"✅ Obiekt zapisany w pliku: {filePath}")
     except Exception as e:
         print(f"❌ Błąd podczas zapisywania do pliku {filePath}: {e}")
 
 
-def loadFromPkl(filePath):
+def loadFromPkl(filePath, debug=True):
     try:
         with open(filePath, 'rb') as file:
             obj = pickle.load(file)
-        print(f"✅ Obiekt wczytany z pliku: {filePath}")
+        if debug:
+            print(f"✅ Obiekt wczytany z pliku: {filePath}")
         return obj
     except FileNotFoundError:
         print(f"❌ Błąd: Plik {filePath} nie istnieje.")
