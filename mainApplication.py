@@ -16,7 +16,7 @@ class Classifier:
         self.currentModel = self.models[firstModelKey]
         # Model Selection Section (Dropdown)
         self.modelFrame = tk.Frame(self.root)
-        self.modelFrame.pack(pady=20)
+        self.modelFrame.pack(pady=10)
         self.modelLabel = tk.Label(self.modelFrame, text="Select Model:", font=boldFont18)
         self.modelLabel.pack(side=tk.LEFT, padx=10)
         # Using tk.OptionMenu
@@ -27,30 +27,31 @@ class Classifier:
         self.modelDropdown.pack(side=tk.LEFT, padx=10)
         # File Input Section
         self.fileFrame = tk.Frame(self.root)
-        self.fileFrame.pack(pady=20)
+        self.fileFrame.pack(pady=10)
         self.fileLabel = tk.Label(self.fileFrame, text="Classify by File:", font=boldFont18)
         self.fileLabel.pack(side=tk.LEFT, padx=10)
         self.browseButton = tk.Button(self.fileFrame, text="Browse File", command=self.browseFile, font=boldFont18)
         self.browseButton.pack(side=tk.LEFT, padx=10)
         # Text Input Section
         self.textFrame = tk.Frame(self.root)
-        self.textFrame.pack(pady=20)
+        self.textFrame.pack(pady=10)
         self.textLabel = tk.Label(self.textFrame, text="Classify by Text Input:", font=boldFont18)
         self.textLabel.pack(anchor="w")
         self.textInput = tk.Text(self.textFrame, height=20, width=100, font=("Ariel", 16))
-        self.textInput.pack(pady=(10, 0))
+        self.textInput.pack(pady=(20, 0))
         # Classify button and result display
         self.classifyButton = tk.Button(self.root, text="Classify Text", command=self.classifyInputText, font=boldFont18)
-        self.classifyButton.pack(side=tk.TOP, pady=(0, 20), anchor="center")  # Centered button
+        self.classifyButton.pack(side=tk.TOP, pady=(0, 10), anchor="center")  # Centered button
         # Result display with padding from the right
         self.resultLabel = tk.Label(self.root, text="", font=("Arial", 32, "bold"), anchor="e")
-        self.resultLabel.place(relx=1.0, x=-50, y=770, anchor="e")  # Right-aligned with 50 padding from right
+        self.resultLabel.place(relx=1.0, x=-50, y=720, anchor="e")  # Right-aligned with 50 padding from right
 
         self.root.update_idletasks()
         windowWidth = self.root.winfo_width()
         windowHeight = self.root.winfo_height()
         screenWidth = self.root.winfo_screenwidth()
         screenHeight = self.root.winfo_screenheight()
+        print(f"{windowWidth=} {windowHeight=} {screenWidth=} {screenHeight=}")
         x = (screenWidth // 2) - (windowWidth // 2)
         y = (screenHeight // 2) - (windowHeight // 2)
         self.root.geometry(f"{windowWidth}x{windowHeight}+{x}+{y}")
