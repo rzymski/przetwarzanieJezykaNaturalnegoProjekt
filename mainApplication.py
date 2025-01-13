@@ -109,9 +109,13 @@ class Classifier:
         inputText = self.textInput.get("1.0", tk.END).strip()
         if inputText:
             print(f"Input text: {inputText}")
-            result = classifySentiment(inputText, self.currentModel['model'], self.currentModel['vector'], self.currentModel['pca'])
-            self.resultLabel.config(text=f"{('POSITIVE' if result else 'NEGATIVE')} REVIEW", fg=('green' if result else 'red'))
-            # messagebox.showinfo("Classification Result", f"Text was classified as {'positive' if result else 'negative'}.")
+            try:
+                result = classifySentiment(inputText, self.currentModel['model'], self.currentModel['vector'], self.currentModel['pca'])
+                self.resultLabel.config(text=f"{('POSITIVE' if result else 'NEGATIVE')} REVIEW", fg=('green' if result else 'red'))
+                # messagebox.showinfo("Classification Result", f"Text was classified as {'positive' if result else 'negative'}.")
+            except Exception as e:
+                self.resultLabel.config(text=f"")
+                messagebox.showerror("Error", f"An error occurred when processing model:\n{e}")
         else:
             print("No text entered.")
             self.resultLabel.config(text=f"")

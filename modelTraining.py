@@ -65,7 +65,7 @@ def evaluateModel(classifier, folderWithFiles, dataMatrix, title="", maxNumberOf
     # Macierz pomyłek (wykres)
     if drawPlots:
         confMatrix = confusion_matrix(labels, predictedLabels)
-        plt.figure(figsize=(8, 6))
+        plt.figure(figsize=(24, 18))
         sns.heatmap(confMatrix, annot=True, fmt="d", cmap="Blues", xticklabels=['Negative', 'Positive'], yticklabels=['Negative', 'Positive'])
         plt.xlabel("Predicted Label")
         plt.ylabel("True Label")

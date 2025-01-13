@@ -159,14 +159,14 @@ if __name__ == "__main__":
             {"voting": ["soft"]}
         ]),
     ]
-    main(createVector=True, vectorName="TFIDF", models=tfidfBestModels, save=True)
+    main(createVector=True, vectorName="TFIDF", models=tfidfBestModels, save=True, drawPlots=True)
     bagOfWordsBestModels = [
         (LogisticRegression, "Logistic Regression", [{"C": [0.5]}, {"solver": ["saga"]}, {"max_iter": [100]}, {"tol": [1e-3]}]),
         (RandomForestClassifier, "Random Forest", [{"n_estimators": [1500]}, {"max_depth": [None]}, {"min_samples_split": [10]}])
     ]
-    main(createVector=True, vectorName="BagOfWords", models=bagOfWordsBestModels, save=True)
+    main(createVector=True, vectorName="BagOfWords", models=bagOfWordsBestModels, save=True, drawPlots=True)
     world2VecBestModels = [(LogisticRegression, "Logistic Regression", [{"C": [0.5]}, {"solver": ["lbfgs"]}, {"max_iter": [100]}, {"tol": [1e-3]}])]
-    main(createVector=True, vectorName="Word2Vec", models=world2VecBestModels, save=True)
+    main(createVector=True, vectorName="Word2Vec", models=world2VecBestModels, save=True, drawPlots=True)
 
     '''Testing Section using 5000 files'''
     # main(maxNumberOfFiles=5000, vectorName="TFIDF", createVector=True)
