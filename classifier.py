@@ -30,4 +30,5 @@ def classifySentiment(text, model, vectorizer, pca=None):
         textVector = pca.transform(textVector)
     # Predykcja
     prediction = model.predict(textVector)
-    return prediction[0] == 1
+    probabilities = model.predict_proba(textVector)[0] if hasattr(model, "predict_proba") else None
+    return prediction[0] == 1, probabilities

@@ -47,8 +47,8 @@ class Classifier:
         self.classifyButton = tk.Button(self.root, text="Classify Text", command=self.classifyInputText, font=boldFont18)
         self.classifyButton.pack(side=tk.TOP, pady=(0, 10), anchor="center")  # Centered button
         # Result display with padding from the right
-        self.resultLabel = tk.Label(self.root, text="", font=("Arial", 32, "bold"), anchor="e")
-        self.resultLabel.place(relx=1.0, x=-50, y=720, anchor="e")  # Right-aligned with 50 padding from right
+        self.resultLabel = tk.Label(self.root, text="", font=("Arial", 28, "bold"), anchor="e")
+        self.resultLabel.place(relx=1.0, x=-10, y=720, anchor="e")  # Right-aligned with 50 padding from right
 
         self.root.update_idletasks()
         windowWidth = self.root.winfo_width()
@@ -110,8 +110,10 @@ class Classifier:
         if inputText:
             print(f"Input text: {inputText}")
             try:
-                result = classifySentiment(inputText, self.currentModel['model'], self.currentModel['vector'], self.currentModel['pca'])
-                self.resultLabel.config(text=f"{('POSITIVE' if result else 'NEGATIVE')} REVIEW", fg=('green' if result else 'red'))
+                result, probabilities = classifySentiment(inputText, self.currentModel['model'], self.currentModel['vector'], self.currentModel['pca'])
+                probability = round(100 * max(probabilities[0], probabilities[1]), 2) if probabilities is not None else None
+                probabilityText = f" {probability}%" if probability else ""
+                self.resultLabel.config(text=f"{('POSITIVE' if result else 'NEGATIVE')} REVIEW {probabilityText}", fg=('green' if result else 'red'))
                 # messagebox.showinfo("Classification Result", f"Text was classified as {'positive' if result else 'negative'}.")
             except Exception as e:
                 self.resultLabel.config(text=f"")
