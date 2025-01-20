@@ -1,3 +1,4 @@
+import os
 from sklearn.svm import LinearSVC, SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -17,6 +18,8 @@ def main(lemmatize=False, vectorName="", createVector=False, maxNumberOfFiles=No
     outputDir = 'dataProcessed'
     if lemmatize:
         lemmatizeData(inputDir, outputDir)
+
+    os.makedirs(outputFolder, exist_ok=True)
 
     # Ścieżki do folderów i plików wyjściowych
     trainFolderPath = f'{outputDir}/train'
@@ -42,7 +45,7 @@ def main(lemmatize=False, vectorName="", createVector=False, maxNumberOfFiles=No
     if vectorizer and save:
         saveToPkl(vectorizer, vectorizerFilePath)
 
-    # # Wczytaj dane
+    # Wczytaj dane
     trainData = pd.read_csv(trainMatrixFile, header=None).values
     print("📖 Wczytano dane treningowe")
     testData = pd.read_csv(testMatrixFile, header=None).values
@@ -51,16 +54,14 @@ def main(lemmatize=False, vectorName="", createVector=False, maxNumberOfFiles=No
     # Redukcja wymiarowości za pomocą PCA
     if vectorName in ["TFIDF", "BagOfWords"]:
         print("🔄 Redukcja wymiarowości danych za pomocą PCA...")
-        pca = TruncatedSVD(n_components=2500)  # Zredukuj do 2500 wymiarów
-        trainDataReduced = pca.fit_transform(trainData)
-        testDataReduced = pca.transform(testData)
+        reducer = TruncatedSVD(n_components=2500)  # Zredukuj do 2500 wymiarów
+        trainData = reducer.fit_transform(trainData)
+        testData = reducer.transform(testData)
         if save:
-            saveToPkl(pca, f"{outputFolder}/{vectorName}_PCA.pkl")  # Zapisanie PCA
-        print(f"✅ Zredukowano wymiarowość do {pca.n_components} komponentów.")
+            saveToPkl(reducer, f"{outputFolder}/{vectorName}_PCA.pkl")  # Zapisanie PCA
+        print(f"✅ Zredukowano wymiarowość do {reducer.n_components} komponentów.")
     else:
         print(f"⚠️ Pomijanie redukcji wymiarowości dla {vectorName}...")
-        trainDataReduced = trainData
-        testDataReduced = testData
 
     if not models:
         # Lista modeli z parametrami
@@ -97,12 +98,6 @@ def main(lemmatize=False, vectorName="", createVector=False, maxNumberOfFiles=No
     results = []
 
     for trainModelFunction, modelName, paramDictList in models:
-        if modelName not in ["Random Forest"] and vectorName not in ["Word2Vec", "Doc2Vec", "FastText"]:
-            currentTrainData = trainDataReduced
-            currentTestData = testDataReduced
-        else:
-            currentTrainData = trainData
-            currentTestData = testData
         # Tworzenie wszystkich kombinacji parametrów
         allParams = {}
         for paramDict in paramDictList:
@@ -113,13 +108,13 @@ def main(lemmatize=False, vectorName="", createVector=False, maxNumberOfFiles=No
         for paramCombination in product(*paramValues):
             params = dict(zip(paramNames, paramCombination))
             print(f"\n{'=' * 10} Training and Evaluating {vectorName} {modelName} with params {params} {'=' * 10}")
-            movieClassifier = trainModel(trainFolderPath, currentTrainData, trainModelFunction, **params, maxNumberOfFiles=maxNumberOfFiles)
+            movieClassifier = trainModel(trainFolderPath, trainData, trainModelFunction, **params, maxNumberOfFiles=maxNumberOfFiles)
             if save:
                 saveToPkl(movieClassifier, f"{outputFolder}/{vectorName}_{modelName.replace(' ', '')}{maxNumberOfFiles if maxNumberOfFiles else ''}.pkl")
             print(f"\nEvaluation on Training Set ({vectorName} - {modelName}):")
-            trainAccuracy, trainAUC = evaluateModel(movieClassifier, trainFolderPath, currentTrainData, f"training {modelName} {params}", maxNumberOfFiles=maxNumberOfFiles, drawPlots=drawPlots)
+            trainAccuracy, trainAUC = evaluateModel(movieClassifier, trainFolderPath, trainData, f"training {modelName} {params}", maxNumberOfFiles=maxNumberOfFiles, drawPlots=drawPlots)
             print(f"\nEvaluation on Test Set ({vectorName} - {modelName}):")
-            testAccuracy, testAUC = evaluateModel(movieClassifier, testFolderPath, currentTestData, f"test {modelName} {params}", maxNumberOfFiles=maxNumberOfFiles, drawPlots=drawPlots)
+            testAccuracy, testAUC = evaluateModel(movieClassifier, testFolderPath, testData, f"test {modelName} {params}", maxNumberOfFiles=maxNumberOfFiles, drawPlots=drawPlots)
             results.append({
                 "Model": modelName,
                 "Parameters": params,
@@ -146,27 +141,27 @@ def main(lemmatize=False, vectorName="", createVector=False, maxNumberOfFiles=No
 
 
 if __name__ == "__main__":
-    '''Section that creates the best chosen models'''
-    tfidfBestModels = [
-        (LogisticRegression, "Logistic Regression", [{"C": [2.0]}, {"solver": ["lbfgs"]}, {"max_iter": [1000]}, {"tol": [1e-3]}]),
-        (StackingClassifier, "Stacking Classifier", [
-            {"estimators": [[('lr', LogisticRegression(C=1.5, solver='saga', max_iter=100, tol=0.001)), ('rf', RandomForestClassifier(n_estimators=1500, max_depth=None, min_samples_split=5))]]},
-            {"final_estimator": [LogisticRegression()]},
-            {"passthrough": [True]}
-        ]),
-        (VotingClassifier, "Voting Classifier", [
-            {"estimators": [[('lr', LogisticRegression(C=1.5, solver='saga', max_iter=100, tol=0.001)), ('rf', RandomForestClassifier(n_estimators=1500, max_depth=None, min_samples_split=5)), ('svc', SVC(C=1.0, probability=True))]]},
-            {"voting": ["soft"]}
-        ]),
-    ]
-    main(createVector=True, vectorName="TFIDF", models=tfidfBestModels, save=True, drawPlots=True)
-    bagOfWordsBestModels = [
-        (LogisticRegression, "Logistic Regression", [{"C": [0.5]}, {"solver": ["saga"]}, {"max_iter": [100]}, {"tol": [1e-3]}]),
-        (RandomForestClassifier, "Random Forest", [{"n_estimators": [1500]}, {"max_depth": [None]}, {"min_samples_split": [10]}])
-    ]
-    main(createVector=True, vectorName="BagOfWords", models=bagOfWordsBestModels, save=True, drawPlots=True)
-    world2VecBestModels = [(LogisticRegression, "Logistic Regression", [{"C": [0.5]}, {"solver": ["lbfgs"]}, {"max_iter": [100]}, {"tol": [1e-3]}])]
-    main(createVector=True, vectorName="Word2Vec", models=world2VecBestModels, save=True, drawPlots=True)
+    # '''Section that creates the best chosen models'''
+    # tfidfBestModels = [
+    #     (LogisticRegression, "Logistic Regression", [{"C": [2.0]}, {"solver": ["lbfgs"]}, {"max_iter": [1000]}, {"tol": [1e-3]}]),
+    #     (StackingClassifier, "Stacking Classifier", [
+    #         {"estimators": [[('lr', LogisticRegression(C=1.5, solver='saga', max_iter=100, tol=0.001)), ('rf', RandomForestClassifier(n_estimators=1500, max_depth=None, min_samples_split=5))]]},
+    #         {"final_estimator": [LogisticRegression()]},
+    #         {"passthrough": [True]}
+    #     ]),
+    #     (VotingClassifier, "Voting Classifier", [
+    #         {"estimators": [[('lr', LogisticRegression(C=1.5, solver='saga', max_iter=100, tol=0.001)), ('rf', RandomForestClassifier(n_estimators=1500, max_depth=None, min_samples_split=5)), ('svc', SVC(C=1.0, probability=True))]]},
+    #         {"voting": ["soft"]}
+    #     ]),
+    # ]
+    # main(createVector=True, vectorName="TFIDF", models=tfidfBestModels, save=True, drawPlots=True)
+    # bagOfWordsBestModels = [
+    #     (LogisticRegression, "Logistic Regression", [{"C": [0.5]}, {"solver": ["saga"]}, {"max_iter": [100]}, {"tol": [1e-3]}]),
+    #     (RandomForestClassifier, "Random Forest", [{"n_estimators": [1500]}, {"max_depth": [None]}, {"min_samples_split": [10]}])
+    # ]
+    # main(createVector=True, vectorName="BagOfWords", models=bagOfWordsBestModels, save=True, drawPlots=True)
+    # world2VecBestModels = [(LogisticRegression, "Logistic Regression", [{"C": [0.5]}, {"solver": ["lbfgs"]}, {"max_iter": [100]}, {"tol": [1e-3]}])]
+    # main(createVector=True, vectorName="Word2Vec", models=world2VecBestModels, save=True, drawPlots=True)
 
     '''Testing Section using 5000 files'''
     # main(maxNumberOfFiles=5000, vectorName="TFIDF", createVector=True)
@@ -174,3 +169,9 @@ if __name__ == "__main__":
     # main(maxNumberOfFiles=5000, vectorName="Word2Vec", createVector=True)
     # main(maxNumberOfFiles=5000, vectorName="Doc2Vec", createVector=True)
     # main(maxNumberOfFiles=5000, vectorName="FastText", createVector=True)
+
+    main(maxNumberOfFiles=350, vectorName="TFIDF", createVector=True)
+    main(maxNumberOfFiles=350, vectorName="BagOfWords", createVector=True)
+    main(maxNumberOfFiles=350, vectorName="Word2Vec", createVector=True)
+    main(maxNumberOfFiles=350, vectorName="Doc2Vec", createVector=True)
+    main(maxNumberOfFiles=350, vectorName="FastText", createVector=True)

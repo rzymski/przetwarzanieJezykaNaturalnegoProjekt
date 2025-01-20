@@ -2,3 +2,6 @@ venv/
 *.csv
 data/
 dataProcessed/
+results/
+vectors/
+models/

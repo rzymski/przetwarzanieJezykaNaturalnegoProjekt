@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import configparser
 from utils import loadFromPkl
+from transformers import BertModel
 from classifier import classifySentiment
 
 
@@ -14,7 +15,7 @@ class Classifier:
         self.root = root
         self.root.title("Text Classifier")
         boldFont18 = ("Arial", 18, "bold")
-        # Load all models, vectors, and PCA files at startup
+        # Load all models, vectors, and PCA/TruncatedSVD files at startup
         self.models = self.loadAllModels(configFile)
         firstModelKey = next(iter(self.models))
         self.currentModel = self.models[firstModelKey]
@@ -55,7 +56,6 @@ class Classifier:
         windowHeight = self.root.winfo_height()
         screenWidth = self.root.winfo_screenwidth()
         screenHeight = self.root.winfo_screenheight()
-        print(f"{windowWidth=} {windowHeight=} {screenWidth=} {screenHeight=}")
         x = (screenWidth // 2) - (windowWidth // 2)
         y = (screenHeight // 2) - (windowHeight // 2)
         self.root.geometry(f"{windowWidth}x{windowHeight}+{x}+{y}")
@@ -69,12 +69,12 @@ class Classifier:
             try:
                 modelData = {
                     "model": loadFromPkl(config[section].get("model", ""), debug=False),
-                    "vector": loadFromPkl(config[section].get("vector", ""), debug=False),
-                    "pca": loadFromPkl(config[section].get("pca", ""), debug=False) if config[section].get("pca") else None,
+                    "vector": loadFromPkl(config[section].get("vector", ""), debug=False) if config[section].get("vector") else None,
+                    "reducer": loadFromPkl(config[section].get("reducer", ""), debug=False) if config[section].get("reducer") else None,
                 }
                 if modelData['model'] is None:
                     raise Exception(f"Missing model for section '{section}'")
-                if modelData['vector'] is None:
+                if modelData['vector'] is None and "BERT" not in section:
                     raise Exception(f"Missing vector for section '{section}'")
                 models[section] = modelData
                 print(f"✅ Loaded all resources for {section}.")
@@ -88,7 +88,7 @@ class Classifier:
             print(f"Selected Model: {modelName}")
             print(f" - Model Object: {self.currentModel['model']}")
             print(f" - Vector Object: {self.currentModel['vector']}")
-            print(f" - PCA Object: {self.currentModel['pca']}")
+            print(f" - Reducer Object: {self.currentModel['reducer']}")
 
     def browseFile(self):
         filePath = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
@@ -110,7 +110,7 @@ class Classifier:
         if inputText:
             print(f"Input text: {inputText}")
             try:
-                result, probabilities = classifySentiment(inputText, self.currentModel['model'], self.currentModel['vector'], self.currentModel['pca'])
+                result, probabilities = classifySentiment(inputText, self.currentModel['model'], self.currentModel['vector'], self.currentModel['reducer'])
                 probability = round(100 * max(probabilities[0], probabilities[1]), 2) if probabilities is not None else None
                 probabilityText = f" {probability}%" if probability else ""
                 self.resultLabel.config(text=f"{('POSITIVE' if result else 'NEGATIVE')} REVIEW {probabilityText}", fg=('green' if result else 'red'))
