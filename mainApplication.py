@@ -111,6 +111,7 @@ class Classifier:
             print(f"Input text: {inputText}")
             try:
                 result, probabilities = classifySentiment(inputText, self.currentModel['model'], self.currentModel['vector'], self.currentModel['reducer'])
+                print(f"{result=} {probabilities=}")
                 probability = round(100 * max(probabilities[0], probabilities[1]), 2) if probabilities is not None else None
                 probabilityText = f" {probability}%" if probability else ""
                 self.resultLabel.config(text=f"{('POSITIVE' if result else 'NEGATIVE')} REVIEW {probabilityText}", fg=('green' if result else 'red'))

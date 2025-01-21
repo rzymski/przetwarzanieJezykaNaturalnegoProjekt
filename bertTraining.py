@@ -58,7 +58,7 @@ def mainForBERT(trainFolderPath, testFolderPath, models=None, maxNumberOfFiles=N
         trainData = reducer.fit_transform(trainData)
         testData = reducer.transform(testData)
         if save:
-            saveToPkl(reducer, f"{outputFolder}/BERT_DimensionalityReducer.pkl")  # Save reducer to .pkl
+            saveToPkl(reducer, f"{outputFolder}/BERT_Reducer.pkl")  # Save reducer to .pkl
             print(f"💾 Dimensionality reducer saved to {outputFolder}/BERT_DimensionalityReducer.pkl")
 
     # Define default models if none provided
@@ -103,7 +103,7 @@ def mainForBERT(trainFolderPath, testFolderPath, models=None, maxNumberOfFiles=N
             classifier = trainModel(trainFolderPath, trainData, trainModelFunction, **params, maxNumberOfFiles=maxNumberOfFiles)
             # Save the model
             if save:
-                modelPath = f"{outputFolder}/{modelName.replace(' ', '_')}_{'_'.join(map(str, paramCombination))}.pkl"
+                modelPath = f"{outputFolder}/BERT_{modelName.replace(' ', '')}.pkl"
                 saveToPkl(classifier, modelPath)
                 print(f"💾 Saved model to {modelPath}")
             # Evaluate the model
@@ -130,4 +130,18 @@ def mainForBERT(trainFolderPath, testFolderPath, models=None, maxNumberOfFiles=N
 
 
 if __name__ == "__main__":
-    mainForBERT(trainFolderPath="data/train", testFolderPath="data/test", maxNumberOfFiles=5000, outputFolder="outputBert")
+    # mainForBERT(trainFolderPath="data/train", testFolderPath="data/test", maxNumberOfFiles=5000, outputFolder="outputBert")
+    tfidfBestModels = [
+        (LogisticRegression, "Logistic Regression", [{"C": [2.0]}, {"solver": ["lbfgs"]}, {"max_iter": [1000]}, {"tol": [1e-3]}]),
+        (LinearSVC, "LinearSVC", [{"C": [1.0]}, {"loss": ["squared_hinge"]}, {"max_iter": [100]}, {"tol": [1e-3]}]),
+        (StackingClassifier, "Stacking Classifier", [
+            {"estimators": [[('lr', LogisticRegression(C=1.5, solver='saga', max_iter=100, tol=0.001)), ('rf', RandomForestClassifier(n_estimators=1500, max_depth=None, min_samples_split=5))]]},
+            {"final_estimator": [LogisticRegression()]},
+            {"passthrough": [True]}
+        ]),
+        (VotingClassifier, "Voting Classifier", [
+            {"estimators": [[('lr', LogisticRegression(C=1.5, solver='saga', max_iter=100, tol=0.001)), ('rf', RandomForestClassifier(n_estimators=1500, max_depth=None, min_samples_split=5)), ('svc', SVC(C=1.0, probability=True))]]},
+            {"voting": ["soft"]}
+        ]),
+    ]
+    mainForBERT(trainFolderPath="data/train", testFolderPath="data/test", save=True, models=tfidfBestModels, outputFolder="outputBert")

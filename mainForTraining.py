@@ -58,7 +58,7 @@ def main(lemmatize=False, vectorName="", createVector=False, maxNumberOfFiles=No
         trainData = reducer.fit_transform(trainData)
         testData = reducer.transform(testData)
         if save:
-            saveToPkl(reducer, f"{outputFolder}/{vectorName}_PCA.pkl")  # Zapisanie PCA
+            saveToPkl(reducer, f"{outputFolder}/{vectorName}_Reducer.pkl")  # Zapisanie PCA
         print(f"✅ Zredukowano wymiarowość do {reducer.n_components} komponentów.")
     else:
         print(f"⚠️ Pomijanie redukcji wymiarowości dla {vectorName}...")
@@ -164,14 +164,8 @@ if __name__ == "__main__":
     # main(createVector=True, vectorName="Word2Vec", models=world2VecBestModels, save=True, drawPlots=True)
 
     '''Testing Section using 5000 files'''
-    # main(maxNumberOfFiles=5000, vectorName="TFIDF", createVector=True)
-    # main(maxNumberOfFiles=5000, vectorName="BagOfWords", createVector=True)
-    # main(maxNumberOfFiles=5000, vectorName="Word2Vec", createVector=True)
-    # main(maxNumberOfFiles=5000, vectorName="Doc2Vec", createVector=True)
-    # main(maxNumberOfFiles=5000, vectorName="FastText", createVector=True)
-
-    main(maxNumberOfFiles=350, vectorName="TFIDF", createVector=True)
-    main(maxNumberOfFiles=350, vectorName="BagOfWords", createVector=True)
-    main(maxNumberOfFiles=350, vectorName="Word2Vec", createVector=True)
-    main(maxNumberOfFiles=350, vectorName="Doc2Vec", createVector=True)
-    main(maxNumberOfFiles=350, vectorName="FastText", createVector=True)
+    main(maxNumberOfFiles=5000, vectorName="TFIDF", createVector=True)
+    main(maxNumberOfFiles=5000, vectorName="BagOfWords", createVector=True)
+    main(maxNumberOfFiles=5000, vectorName="Word2Vec", createVector=True)
+    main(maxNumberOfFiles=5000, vectorName="Doc2Vec", createVector=True)
+    main(maxNumberOfFiles=5000, vectorName="FastText", createVector=True)
