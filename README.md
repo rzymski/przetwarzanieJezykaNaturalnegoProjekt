@@ -12,11 +12,11 @@ ___
 **Klasyfikator semantyki recenzji**
 1) [x] Lemantyzacja plików tekstowych
 2) [x] Tworzenie wektorów TF-IDF, Bag of words, Word2Vec, Doc2Vec, Fast text 
-3) [x] Redukcja wymiarów wektorów PCA
+3) [x] Redukcja wymiarów wektorów
 4) [x] Trenowanie modeli
 5) [x] Ocena modeli
 6) [x] Zapisywanie wyników modeli do plików xlsx
-7) [x] Zapisywanie wektorów, modeli i PCA do plików pkl
+7) [x] Zapisywanie wektorów, modeli i redukcji wymiarów do plików pkl
 8) [x] Klasyfikator wykorzystujący konkretny model do oceny konkretnego tekstu
 9) [x] Aplikacja z GUI wykorzystująca klasyfikator
 
@@ -85,12 +85,12 @@ Skrypt **`mainApplication.py`** zawiera główną aplikacje z gui, która wykorz
 Aplikacja wymaga już gotowych modeli i wektorów. Ścieżki do nich powinny się znajdować w pliku **`classifier-config.ini`**
 
 #### Przykładowa struktura **`classifier-config.ini`** 
-6 modeli (każdy model potrzebuje ścieżki do modelu, wektora i opcjonalnie pca)
+przykłady modeli (każdy model potrzebuje ścieżki do modelu, i opcjonalnie wektora oraz redukcji wektorów)
 ```ini
 [TFIDF Logistic Regression]
 model = models/TFIDF_LogisticRegression.pkl
 vector = vectors/TFIDF.pkl
-pca = vectors/TFIDF_PCA.pkl
+reducer = reducers/TFIDF_Reducer.pkl
 
 [TFIDF Voting Classifier]
 model = models/TFIDF_VotingClassifier.pkl
@@ -103,7 +103,7 @@ vector = vectors/TFIDF.pkl
 [Bag Of Words Logistic Regression]
 model = models/BagOfWords_LogisticRegression.pkl
 vector = vectors/BagOfWords.pkl
-pca = vectors/BagOfWords_PCA.pkl
+reducer = reducers/BagOfWords_Reducer.pkl
 
 [Bag Of Words Random Forest]
 model = models/BagOfWords_RandomForest.pkl
@@ -112,4 +112,20 @@ vector = vectors/BagOfWords.pkl
 [Word2Vec Logistic Regression]
 model = models/Word2Vec_LogisticRegression.pkl
 vector = vectors/Word2Vec.pkl
+
+[BERT LinearSVC]
+model = models/BERT_LinearSVC.pkl
+reducer = reducers/BERT_Reducer.pkl
+
+[BERT Logistic Regression]
+model = models/BERT_LogisticRegression.pkl
+reducer = reducers/BERT_Reducer.pkl
+
+[BERT StackingClassifier]
+model = models/BERT_StackingClassifier.pkl
+reducer = reducers/BERT_Reducer.pkl
+
+[BERT VotingClassifier]
+model = models/BERT_VotingClassifier.pkl
+reducer = reducers/BERT_Reducer.pkl
 ```
